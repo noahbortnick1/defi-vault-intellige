@@ -19,13 +19,15 @@ import {
   Star,
   Funnel,
   ArrowsLeftRight,
-  MagnifyingGlass
+  MagnifyingGlass,
+  Lightning
 } from '@phosphor-icons/react';
 import { generateMockVaults, generateMockPortfolio, generateMockAlerts, PROTOCOLS } from '@/lib/mockData';
 import { formatCurrency, formatPercent, formatDate, getChainName, getRiskColor, getRiskBgColor } from '@/lib/format';
 import type { Vault as VaultType, Chain, AssetType, StrategyType, RiskLevel } from '@/lib/types';
+import { DiscoveryEnginePanel } from '@/components/DiscoveryEnginePanel';
 
-type Page = 'landing' | 'vaults' | 'portfolio' | 'docs' | 'settings';
+type Page = 'landing' | 'vaults' | 'portfolio' | 'discovery' | 'docs' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -182,6 +184,10 @@ function App() {
             <Button variant="ghost" onClick={() => setCurrentPage('vaults')}>
               <ChartLine className="mr-2" size={18} />
               Vaults
+            </Button>
+            <Button variant="ghost" onClick={() => setCurrentPage('discovery')}>
+              <Lightning className="mr-2" size={18} />
+              Discovery
             </Button>
             <Button variant="ghost" onClick={() => setCurrentPage('portfolio')}>
               <Briefcase className="mr-2" size={18} />
@@ -613,6 +619,49 @@ function App() {
     );
   };
 
+  const renderDiscovery = () => (
+    <div className="min-h-screen bg-background">
+      <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary rounded-lg">
+              <Vault className="text-primary-foreground" size={24} weight="bold" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold">DeFi Vault Intelligence</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => setCurrentPage('vaults')}>
+              <ChartLine className="mr-2" size={18} />
+              Vaults
+            </Button>
+            <Button variant="ghost" onClick={() => setCurrentPage('discovery')}>
+              <Lightning className="mr-2" size={18} />
+              Discovery
+            </Button>
+            <Button variant="ghost" onClick={() => setCurrentPage('portfolio')}>
+              <Briefcase className="mr-2" size={18} />
+              Portfolio
+            </Button>
+            <Button variant="ghost" onClick={() => setCurrentPage('docs')}>
+              <Book className="mr-2" size={18} />
+              Docs
+            </Button>
+            <Button variant="ghost" onClick={() => setCurrentPage('settings')}>
+              <Gear className="mr-2" size={18} />
+              Settings
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto px-6 py-8">
+        <DiscoveryEnginePanel />
+      </div>
+    </div>
+  );
+
   const renderPage = () => {
     if (selectedVault) {
       return renderVaultDetail();
@@ -623,12 +672,14 @@ function App() {
         return renderLanding();
       case 'vaults':
         return renderVaultExplorer();
+      case 'discovery':
+        return renderDiscovery();
       case 'portfolio':
-        return renderLanding(); // Simplified for MVP
+        return renderLanding();
       case 'docs':
-        return renderLanding(); // Simplified for MVP
+        return renderLanding();
       case 'settings':
-        return renderLanding(); // Simplified for MVP
+        return renderLanding();
       default:
         return renderLanding();
     }

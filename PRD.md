@@ -26,6 +26,13 @@ This is a multi-page institutional analytics platform with extensive data visual
 - **Progression**: Load vault table → Apply filters (chain, protocol, risk, TVL, APY) → Sort by metric → Save view/add to watchlist → Click vault for details
 - **Success criteria**: Sub-second filtering, ability to save custom views, watchlist persistence, smooth navigation to detail pages
 
+### Vault Discovery Engine
+- **Functionality**: Automatic vault discovery system with three layers (aggregators, protocol registries, onchain detection), strategy classification, and yield decomposition
+- **Purpose**: Automatically find 90-95% of vaults across chains without manual curation - this is the technical moat
+- **Trigger**: User navigates to Discovery page or system runs scheduled jobs
+- **Progression**: Initialize engine → Run Layer 1 (aggregator seed) → Run Layer 2 (registry scan) → Run Layer 3 (onchain detection) → Deduplicate → Classify strategies → Display results with stats
+- **Success criteria**: Discovery of vaults from all three sources, proper deduplication based on confidence scores, strategy classification with yield decomposition, real-time job status tracking
+
 ### Vault Detail Page
 - **Functionality**: Comprehensive single-vault analysis with strategy breakdown, yield decomposition (base vs incentives), risk factor breakdown, dependency graph, historical charts, governance assessment, liquidity analysis
 - **Purpose**: Provide all data needed for thorough due diligence on a specific vault
