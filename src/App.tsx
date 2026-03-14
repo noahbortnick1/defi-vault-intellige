@@ -5,60 +5,50 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Vault, 
-  ChartLine, 
-  Briefcase, 
-  Book, 
-  Gear, 
-  TrendUp, 
-  ShieldCheck, 
-  Warning,
-  Star,
-  Funnel,
-  ArrowsLeftRight,
+  ChartBar,
+  Vault,
+  Lightning,
+  Briefcase,
+  Book,
+  Gear,
   MagnifyingGlass,
-  Lightning
+  Plus,
+  CaretDown,
+  ShieldCheck,
+  TrendUp,
+  CurrencyDollar,
+  ChartLine,
+  Warning,
+  ArrowRight
 } from '@phosphor-icons/react';
-import { generateMockVaults, generateMockPortfolio, generateMockAlerts, PROTOCOLS } from '@/lib/mockData';
-import { formatCurrency, formatPercent, formatDate, getChainName, getRiskColor, getRiskBgColor } from '@/lib/format';
-import type { Vault as VaultType, Chain, AssetType, StrategyType, RiskLevel } from '@/lib/types';
-import { DiscoveryEnginePanel } from '@/components/DiscoveryEnginePanel';
+import { VAULTS, RADAR_EVENTS, DEMO_PORTFOLIOS, PROTOCOLS } from '@/lib/mockData';
+import { formatCurrency, formatPercent, getRiskBgColor, getChainName, getStrategyLabel } from '@/lib/format';
+import type { Vault as VaultType, FilterState, Portfolio, RadarEvent } from '@/lib/types';
+import { VaultExplorer } from '@/components/VaultExplorer';
+import { VaultDetail } from '@/components/VaultDetail';
+import { YieldRadar } from '@/components/YieldRadar';
+import { PortfolioView } from '@/components/PortfolioView';
 
-type Page = 'landing' | 'vaults' | 'portfolio' | 'discovery' | 'docs' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'compare' | 'reports' | 'pricing' | 'docs' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
-  const [vaults, setVaults] = useKV<VaultType[]>('vaults', []);
+  const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null);
   const [watchlist, setWatchlist] = useKV<string[]>('watchlist', []);
-  const [selectedVault, setSelectedVault] = useState<VaultType | null>(null);
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [chainFilter, setChainFilter] = useState<Chain | 'all'>('all');
-  const [riskFilter, setRiskFilter] = useState<RiskLevel | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'apy' | 'tvl' | 'riskScore'>('tvl');
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string>('portfolio-dao');
 
-  if (!vaults || vaults.length === 0) {
-    const mockVaults = generateMockVaults(50);
-    setVaults(mockVaults);
-  }
-
-  const safeVaults = vaults || [];
   const safeWatchlist = watchlist || [];
 
-  const filteredVaults = useMemo(() => {
-    return safeVaults
-      .filter((vault) => {
-        const matchesSearch = vault.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          vault.protocol.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesChain = chainFilter === 'all' || vault.chain === chainFilter;
-        const matchesRisk = riskFilter === 'all' || vault.riskLevel === riskFilter;
-        return matchesSearch && matchesChain && matchesRisk;
-      })
-      .sort((a, b) => b[sortBy] - a[sortBy]);
-  }, [safeVaults, searchTerm, chainFilter, riskFilter, sortBy]);
+  const navigateToVault = (vaultId: string) => {
+    setSelectedVaultId(vaultId);
+    setCurrentPage('vault-detail');
+  };
+
+  const navigateBack = () => {
+    setSelectedVaultId(null);
+    setCurrentPage('vaults');
+  };
 
   const toggleWatchlist = (vaultId: string) => {
     setWatchlist((current) => {
@@ -69,617 +59,549 @@ function App() {
     });
   };
 
-  const renderLanding = () => (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-lg">
-              <Vault className="text-primary-foreground" size={24} weight="bold" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">DeFi Vault Intelligence</h1>
-              <p className="text-xs text-muted-foreground">Institutional Treasury Analytics</p>
-            </div>
+  const renderNav = (showFull: boolean = true) => (
+    <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        <button 
+          onClick={() => setCurrentPage('landing')}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <div className="p-2 bg-primary rounded-lg">
+            <ChartBar className="text-primary-foreground" size={24} weight="bold" />
           </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => setCurrentPage('docs')}>
+          <div className="text-left">
+            <h1 className="text-xl font-bold">Yield Terminal</h1>
+            <p className="text-xs text-muted-foreground">Institutional DeFi Intelligence</p>
+          </div>
+        </button>
+        
+        {showFull && (
+          <div className="flex items-center gap-2">
+            <Button 
+              variant={currentPage === 'vaults' || currentPage === 'vault-detail' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('vaults')}
+              size="sm"
+            >
+              <Vault className="mr-2" size={18} />
+              Vaults
+            </Button>
+            <Button 
+              variant={currentPage === 'radar' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('radar')}
+              size="sm"
+            >
+              <Lightning className="mr-2" size={18} />
+              Radar
+            </Button>
+            <Button 
+              variant={currentPage === 'portfolio' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('portfolio')}
+              size="sm"
+            >
+              <Briefcase className="mr-2" size={18} />
+              Portfolio
+            </Button>
+            <Button 
+              variant={currentPage === 'pricing' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('pricing')}
+              size="sm"
+            >
+              <CurrencyDollar className="mr-2" size={18} />
+              Pricing
+            </Button>
+            <Button 
+              variant={currentPage === 'docs' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('docs')}
+              size="sm"
+            >
               <Book className="mr-2" size={18} />
               Docs
             </Button>
+          </div>
+        )}
+        
+        {!showFull && (
+          <div className="flex items-center gap-3">
             <Button onClick={() => setCurrentPage('vaults')}>
               Launch App
             </Button>
           </div>
+        )}
+      </div>
+    </nav>
+  );
+
+  const renderLanding = () => (
+    <div className="min-h-screen bg-background">
+      {renderNav(false)}
+
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-background to-background" />
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         </div>
-      </nav>
 
-      <div className="container mx-auto px-6 py-24">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div className="space-y-4">
-            <Badge className="mb-4">Institutional Grade Analytics</Badge>
-            <h2 className="text-5xl font-bold tracking-tight">
-              Due Diligence for
+        <div className="relative container mx-auto px-6 py-24">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <Badge className="mb-4 bg-accent/10 text-accent border-accent/20">
+              Institutional Grade Analytics
+            </Badge>
+            
+            <h2 className="text-5xl font-bold tracking-tight leading-tight">
+              Know where DeFi yield comes from
               <br />
-              <span className="text-accent">DeFi Treasury Management</span>
+              <span className="text-accent">before you allocate</span>
             </h2>
+            
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive risk assessment, yield analysis, and portfolio monitoring for funds, treasuries,
-              and developers deploying capital in DeFi protocols.
+              Due diligence, risk assessment, and portfolio analytics for institutional DeFi treasury management.
+              Explainable risk scoring and comprehensive vault intelligence for confident capital allocation.
             </p>
-          </div>
 
-          <div className="flex items-center justify-center gap-4">
-            <Button size="lg" onClick={() => setCurrentPage('vaults')}>
-              <ChartLine className="mr-2" size={20} />
-              Explore Vaults
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => setCurrentPage('docs')}>
-              <Book className="mr-2" size={20} />
-              Read Documentation
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-16">
-            <Card>
-              <CardHeader>
-                <ShieldCheck className="text-accent mb-2" size={32} />
-                <CardTitle>Explainable Risk</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Every risk score breaks down into smart contract, liquidity, market, centralization, and complexity factors with clear explanations.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <TrendUp className="text-accent mb-2" size={32} />
-                <CardTitle>Yield Decomposition</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Understand yield sources: base yield vs. incentives, trading fees vs. borrow interest. See sustainability metrics.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Briefcase className="text-accent mb-2" size={32} />
-                <CardTitle>Portfolio Tracking</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Monitor treasury exposure across assets, protocols, and strategies. Track concentrations and generate reports.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <Button size="lg" onClick={() => setCurrentPage('vaults')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Vault className="mr-2" size={20} />
+                Explore Vaults
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => setCurrentPage('portfolio')}>
+                <Briefcase className="mr-2" size={20} />
+                View Demo Portfolio
+              </Button>
+              <Button size="lg" variant="ghost" onClick={() => setCurrentPage('docs')}>
+                <Book className="mr-2" size={20} />
+                Documentation
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      <footer className="border-t border-border py-12 mt-24">
-        <div className="container mx-auto px-6 text-center text-sm text-muted-foreground">
-          <p>DeFi Vault Intelligence • Powered by Spark</p>
+      <div className="container mx-auto px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
+            <CardHeader>
+              <ShieldCheck className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Explainable Risk Scoring</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Every risk score breaks down into smart contract, liquidity, market, and governance factors with transparent explanations. No black boxes.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
+            <CardHeader>
+              <ChartLine className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Yield Decomposition</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Understand yield sources: base yield vs. incentives, trading fees vs. borrow interest. Assess sustainability and real returns.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
+            <CardHeader>
+              <Briefcase className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Portfolio Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Monitor treasury exposure across assets, protocols, and strategies. Track concentration risks and generate institutional reports.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="border-2 border-accent/20 bg-gradient-to-br from-accent/5 to-background">
+          <CardHeader>
+            <CardTitle className="text-2xl mb-2">Platform Coverage</CardTitle>
+            <CardDescription>
+              Comprehensive vault intelligence across major DeFi protocols and chains
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div>
+                <p className="text-caption text-muted-foreground mb-2">Total TVL</p>
+                <p className="text-metric text-foreground">{formatCurrency(VAULTS.reduce((sum, v) => sum + v.tvl, 0))}</p>
+              </div>
+              <div>
+                <p className="text-caption text-muted-foreground mb-2">Vaults Tracked</p>
+                <p className="text-metric text-foreground">{VAULTS.length}+</p>
+              </div>
+              <div>
+                <p className="text-caption text-muted-foreground mb-2">Protocols</p>
+                <p className="text-metric text-foreground">{PROTOCOLS.length}+</p>
+              </div>
+              <div>
+                <p className="text-caption text-muted-foreground mb-2">Avg APY</p>
+                <p className="text-metric text-accent">
+                  {formatPercent(VAULTS.reduce((sum, v) => sum + v.apy, 0) / VAULTS.length)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="bg-card/30 py-16">
+        <div className="container mx-auto px-6">
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <h3 className="text-3xl font-bold">Built for Institutions</h3>
+            <p className="text-lg text-muted-foreground">
+              Trusted by DAOs, hedge funds, family offices, and protocol treasuries managing millions in DeFi capital. 
+              Bloomberg-grade analytics with transparent methodology.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-6">
+              <Badge variant="outline" className="text-sm py-2 px-4">DAO Treasuries</Badge>
+              <Badge variant="outline" className="text-sm py-2 px-4">Hedge Funds</Badge>
+              <Badge variant="outline" className="text-sm py-2 px-4">Family Offices</Badge>
+              <Badge variant="outline" className="text-sm py-2 px-4">Protocol Teams</Badge>
+              <Badge variant="outline" className="text-sm py-2 px-4">Analysts</Badge>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-16">
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <h3 className="text-3xl font-bold">Ready to get started?</h3>
+          <p className="text-lg text-muted-foreground">
+            Explore vaults, analyze portfolios, and make confident allocation decisions with institutional-grade intelligence.
+          </p>
+          <div className="flex items-center justify-center gap-4 pt-4">
+            <Button size="lg" onClick={() => setCurrentPage('vaults')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+              Explore Vaults
+              <ArrowRight className="ml-2" size={20} />
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => setCurrentPage('pricing')}>
+              View Pricing
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <footer className="border-t border-border py-12 mt-16">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                © 2024 Yield Terminal. Institutional DeFi Intelligence Platform.
+              </p>
+            </div>
+            <div className="flex gap-6">
+              <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Documentation
+              </button>
+              <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                API
+              </button>
+              <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Support
+              </button>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
   );
 
-  const renderVaultExplorer = () => (
+  const renderPricing = () => (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-lg">
-              <Vault className="text-primary-foreground" size={24} weight="bold" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">DeFi Vault Intelligence</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => setCurrentPage('vaults')}>
-              <ChartLine className="mr-2" size={18} />
-              Vaults
-            </Button>
-            <Button variant="ghost" onClick={() => setCurrentPage('discovery')}>
-              <Lightning className="mr-2" size={18} />
-              Discovery
-            </Button>
-            <Button variant="ghost" onClick={() => setCurrentPage('portfolio')}>
-              <Briefcase className="mr-2" size={18} />
-              Portfolio
-            </Button>
-            <Button variant="ghost" onClick={() => setCurrentPage('docs')}>
-              <Book className="mr-2" size={18} />
-              Docs
-            </Button>
-            <Button variant="ghost" onClick={() => setCurrentPage('settings')}>
-              <Gear className="mr-2" size={18} />
-              Settings
-            </Button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="container mx-auto px-6 py-8">
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-3xl font-bold mb-2">Vault Explorer</h2>
-            <p className="text-muted-foreground">
-              Discover and analyze yield vaults across {vaults?.length || 0} protocols and chains
+      {renderNav()}
+      
+      <div className="container mx-auto px-6 py-12">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Pricing Plans</h2>
+            <p className="text-lg text-muted-foreground">
+              Choose the plan that fits your institutional needs
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Total TVL</CardDescription>
-                <CardTitle className="text-2xl">
-                  {formatCurrency(safeVaults.reduce((sum, v) => sum + v.tvl, 0))}
-                </CardTitle>
+              <CardHeader>
+                <CardTitle className="text-xl">Free</CardTitle>
+                <p className="text-3xl font-bold mt-4">$0</p>
+                <p className="text-sm text-muted-foreground">Forever</p>
               </CardHeader>
+              <CardContent className="space-y-4">
+                <Button className="w-full" variant="outline">Get Started</Button>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Browse all vaults</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Basic risk scores</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>5 watchlist items</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Public radar feed</span>
+                  </li>
+                </ul>
+              </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Average APY</CardDescription>
-                <CardTitle className="text-2xl">
-                  {formatPercent(safeVaults.reduce((sum, v) => sum + v.apy, 0) / safeVaults.length)}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Total Vaults</CardDescription>
-                <CardTitle className="text-2xl">{safeVaults.length}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Watchlist</CardDescription>
-                <CardTitle className="text-2xl">{safeWatchlist.length}</CardTitle>
-              </CardHeader>
-            </Card>
-          </div>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Filters</CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setChainFilter('all');
-                    setRiskFilter('all');
-                  }}
-                >
-                  Clear All
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-3 text-muted-foreground" size={18} />
-                  <Input
-                    placeholder="Search vaults..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select value={chainFilter} onValueChange={(v) => setChainFilter(v as Chain | 'all')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chain" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Chains</SelectItem>
-                    <SelectItem value="ethereum">Ethereum</SelectItem>
-                    <SelectItem value="arbitrum">Arbitrum</SelectItem>
-                    <SelectItem value="optimism">Optimism</SelectItem>
-                    <SelectItem value="polygon">Polygon</SelectItem>
-                    <SelectItem value="base">Base</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={riskFilter} onValueChange={(v) => setRiskFilter(v as RiskLevel | 'all')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Risk Level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Risk Levels</SelectItem>
-                    <SelectItem value="low">Low Risk</SelectItem>
-                    <SelectItem value="medium">Medium Risk</SelectItem>
-                    <SelectItem value="high">High Risk</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'apy' | 'tvl' | 'riskScore')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sort By" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tvl">TVL (High to Low)</SelectItem>
-                    <SelectItem value="apy">APY (High to Low)</SelectItem>
-                    <SelectItem value="riskScore">Risk (Low to High)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="border-2 border-accent/50">
+              <CardHeader>
+                <Badge className="w-fit mb-2 bg-accent text-accent-foreground">Most Popular</Badge>
+                <CardTitle className="text-xl">Pro</CardTitle>
+                <p className="text-3xl font-bold mt-4">$299</p>
+                <p className="text-sm text-muted-foreground">per month</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">Start Trial</Button>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Everything in Free</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Detailed risk breakdowns</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Portfolio analytics</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Unlimited watchlist</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Custom alerts</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>DD reports (10/mo)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>API access (1k calls/day)</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-          <div className="grid grid-cols-1 gap-4">
-            {filteredVaults.slice(0, 20).map((vault) => (
-              <Card key={vault.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedVault(vault)}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold">{vault.name}</h3>
-                        {vault.verified && (
-                          <ShieldCheck className="text-accent" size={20} weight="fill" />
-                        )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleWatchlist(vault.id);
-                          }}
-                        >
-                          <Star 
-                            size={18} 
-                            weight={safeWatchlist.includes(vault.id) ? 'fill' : 'regular'}
-                            className={safeWatchlist.includes(vault.id) ? 'text-yellow-500' : ''}
-                          />
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="outline">{vault.protocol.name}</Badge>
-                        <Badge variant="outline">{getChainName(vault.chain)}</Badge>
-                        <Badge variant="outline">{vault.asset}</Badge>
-                        <Badge className={getRiskBgColor(vault.riskLevel)}>
-                          <span className={getRiskColor(vault.riskLevel)}>{vault.riskLevel.toUpperCase()}</span>
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{vault.strategyDescription}</p>
-                    </div>
-                    <div className="flex gap-8 ml-8">
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">APY</p>
-                        <p className="text-2xl font-bold text-accent">{formatPercent(vault.apy)}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">TVL</p>
-                        <p className="text-2xl font-bold">{formatCurrency(vault.tvl)}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">Risk Score</p>
-                        <p className={`text-2xl font-bold ${getRiskColor(vault.riskLevel)}`}>
-                          {vault.riskScore.toFixed(1)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">Team</CardTitle>
+                <p className="text-3xl font-bold mt-4">$899</p>
+                <p className="text-sm text-muted-foreground">per month</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button className="w-full" variant="outline">Contact Sales</Button>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Everything in Pro</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>5 team seats</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Shared workspaces</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Priority support</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Unlimited reports</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>API access (10k calls/day)</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-primary">
+              <CardHeader>
+                <Badge className="w-fit mb-2" variant="secondary">Enterprise</Badge>
+                <CardTitle className="text-xl">Institutional</CardTitle>
+                <p className="text-3xl font-bold mt-4">Custom</p>
+                <p className="text-sm text-muted-foreground">Contact us</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button className="w-full">Contact Sales</Button>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Everything in Team</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Unlimited seats</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Custom integrations</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Dedicated support</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>SLA guarantees</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Unlimited API</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck className="text-accent mt-0.5" size={16} />
+                    <span>Custom research</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     </div>
   );
 
-  const renderVaultDetail = () => {
-    if (!selectedVault) return null;
-
-    return (
-      <div className="min-h-screen bg-background">
-        <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-          <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-            <Button variant="ghost" onClick={() => setSelectedVault(null)}>
-              ← Back to Vaults
-            </Button>
-            <div className="flex items-center gap-2">
-              <Button variant="outline">
-                <ArrowsLeftRight className="mr-2" size={18} />
-                Compare
-              </Button>
-              <Button>
-                Generate Report
-              </Button>
-            </div>
-          </div>
-        </nav>
-
-        <div className="container mx-auto px-6 py-8">
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-4xl font-bold">{selectedVault.name}</h2>
-                {selectedVault.verified && (
-                  <ShieldCheck className="text-accent" size={32} weight="fill" />
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{selectedVault.protocol.name}</Badge>
-                <Badge variant="outline">{getChainName(selectedVault.chain)}</Badge>
-                <Badge variant="outline">{selectedVault.asset}</Badge>
-                <Badge variant="outline">{selectedVault.strategyType}</Badge>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Current APY</CardDescription>
-                  <CardTitle className="text-3xl text-accent">{formatPercent(selectedVault.apy)}</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Total Value Locked</CardDescription>
-                  <CardTitle className="text-3xl">{formatCurrency(selectedVault.tvl)}</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Risk Score</CardDescription>
-                  <CardTitle className={`text-3xl ${getRiskColor(selectedVault.riskLevel)}`}>
-                    {selectedVault.riskScore.toFixed(1)} / 10
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription>Inception</CardDescription>
-                  <CardTitle className="text-xl">{formatDate(selectedVault.inception)}</CardTitle>
-                </CardHeader>
-              </Card>
-            </div>
-
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="yield">Yield Analysis</TabsTrigger>
-                <TabsTrigger value="risk">Risk Assessment</TabsTrigger>
-                <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
-                <TabsTrigger value="governance">Governance</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Strategy Description</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{selectedVault.strategyDescription}</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Protocol Information</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Protocol</p>
-                        <p className="font-medium">{selectedVault.protocol.name}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Category</p>
-                        <p className="font-medium">{selectedVault.protocol.category}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Protocol TVL</p>
-                        <p className="font-medium">{formatCurrency(selectedVault.protocol.tvl)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Audits</p>
-                        <p className="font-medium">{selectedVault.protocol.audits.length} completed</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="yield" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Yield Breakdown</CardTitle>
-                    <CardDescription>Understanding where yields come from</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {selectedVault.apyBreakdown.map((source, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <p className="font-medium">{source.type.toUpperCase()}</p>
-                            <p className="text-sm text-muted-foreground">{source.description}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-accent">{formatPercent(source.apy)}</p>
-                            <p className="text-sm text-muted-foreground">{source.token}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="risk" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Risk Factor Analysis</CardTitle>
-                    <CardDescription>
-                      Overall Risk Score: <span className={`font-bold ${getRiskColor(selectedVault.riskLevel)}`}>
-                        {selectedVault.riskScore.toFixed(1)} / 10
-                      </span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      {selectedVault.riskFactors.map((factor, idx) => (
-                        <div key={idx} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium capitalize">{factor.category.replace('-', ' ')}</p>
-                              <p className="text-sm text-muted-foreground">Weight: {(factor.weight * 100).toFixed(0)}%</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-xl font-bold">{factor.score.toFixed(1)} / 10</p>
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{factor.description}</p>
-                          <div className="bg-secondary p-3 rounded-md">
-                            <p className="text-sm font-medium mb-1">Mitigations:</p>
-                            <ul className="text-sm text-muted-foreground space-y-1">
-                              {factor.mitigations.map((mitigation, midx) => (
-                                <li key={midx}>• {mitigation}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="dependencies" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Protocol Dependencies</CardTitle>
-                    <CardDescription>External protocols this vault depends on</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {selectedVault.dependencies.length > 0 ? (
-                      <div className="space-y-4">
-                        {selectedVault.dependencies.map((dep, idx) => (
-                          <div key={idx} className="flex items-start justify-between p-4 border rounded-lg">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <p className="font-medium">{dep.protocol}</p>
-                                <Badge variant="outline">{dep.type}</Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground">{dep.description}</p>
-                            </div>
-                            <Badge 
-                              className={
-                                dep.riskImpact === 'critical' ? 'bg-red-100 text-red-700' :
-                                dep.riskImpact === 'high' ? 'bg-orange-100 text-orange-700' :
-                                dep.riskImpact === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-green-100 text-green-700'
-                              }
-                            >
-                              {dep.riskImpact.toUpperCase()}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground">No external dependencies</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="governance" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Governance Model</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Governance Type</p>
-                      <p className="font-medium text-lg capitalize">{selectedVault.governance.type.replace('-', ' ')}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Details</p>
-                      <p className="text-muted-foreground">{selectedVault.governance.details}</p>
-                    </div>
-                    {selectedVault.governance.timelock && (
-                      <div>
-                        <p className="text-sm text-muted-foreground">Timelock</p>
-                        <p className="font-medium">{selectedVault.governance.timelock}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderDiscovery = () => (
+  const renderDocs = () => (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-lg">
-              <Vault className="text-primary-foreground" size={24} weight="bold" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">DeFi Vault Intelligence</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => setCurrentPage('vaults')}>
-              <ChartLine className="mr-2" size={18} />
-              Vaults
-            </Button>
-            <Button variant="ghost" onClick={() => setCurrentPage('discovery')}>
-              <Lightning className="mr-2" size={18} />
-              Discovery
-            </Button>
-            <Button variant="ghost" onClick={() => setCurrentPage('portfolio')}>
-              <Briefcase className="mr-2" size={18} />
-              Portfolio
-            </Button>
-            <Button variant="ghost" onClick={() => setCurrentPage('docs')}>
-              <Book className="mr-2" size={18} />
-              Docs
-            </Button>
-            <Button variant="ghost" onClick={() => setCurrentPage('settings')}>
-              <Gear className="mr-2" size={18} />
-              Settings
-            </Button>
+      {renderNav()}
+      
+      <div className="container mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold mb-8">Documentation</h2>
+          
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Getting Started</CardTitle>
+                <CardDescription>Learn how to use Yield Terminal effectively</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Overview</h4>
+                  <p className="text-muted-foreground">
+                    Yield Terminal provides institutional-grade DeFi yield intelligence. Browse vaults, analyze risk,
+                    monitor portfolios, and make data-driven allocation decisions.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Core Features</h4>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                    <li>Vault Explorer: Browse and filter 100+ DeFi yield opportunities</li>
+                    <li>Risk Scoring: Transparent, explainable risk assessments</li>
+                    <li>Yield Radar: Real-time feed of meaningful vault changes</li>
+                    <li>Portfolio Analytics: Monitor treasury allocations and exposures</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Risk Framework</CardTitle>
+                <CardDescription>Understanding our risk scoring methodology</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Risk scores range from 0-10 and aggregate multiple risk factors with transparent weighting:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                  <li><strong>Smart Contract Security (30%):</strong> Audit coverage, code complexity, historical incidents</li>
+                  <li><strong>Liquidity Risk (25%):</strong> TVL depth, withdrawal capacity, utilization rates</li>
+                  <li><strong>Market Risk (20%):</strong> Asset volatility, depeg scenarios, incentive sustainability</li>
+                  <li><strong>Protocol Stability (15%):</strong> Protocol maturity, TVL history, governance strength</li>
+                  <li><strong>Governance & Admin (10%):</strong> Admin controls, timelock delays, upgradeability</li>
+                </ul>
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <p className="text-sm">
+                    <strong>Institutional Grade:</strong> Vaults with risk score ≤4.0, TVL ≥$50M, and verified status.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Yield Decomposition</CardTitle>
+                <CardDescription>How we break down APY sources</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Total APY is decomposed into sustainable and non-sustainable components:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                  <li><strong>Real Yield:</strong> Sustainable earnings from fees and protocol revenue</li>
+                  <li><strong>Incentive Yield:</strong> Token rewards that may decline over time</li>
+                  <li><strong>Trading Fees:</strong> DEX trading fees, borrow interest, etc.</li>
+                  <li><strong>Base Yield:</strong> Core protocol emissions and staking rewards</li>
+                </ul>
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <p className="text-sm">
+                    <strong>Sustainability Assessment:</strong> Higher real yield percentage indicates more sustainable returns.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>API Documentation</CardTitle>
+                <CardDescription>Integrate Yield Terminal data into your systems</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Available for Pro, Team, and Institutional plans. RESTful API with comprehensive vault and portfolio data.
+                </p>
+                <div className="space-y-2 font-mono text-sm">
+                  <p className="text-muted-foreground">GET /api/v1/vaults</p>
+                  <p className="text-muted-foreground">GET /api/v1/vaults/:id</p>
+                  <p className="text-muted-foreground">GET /api/v1/portfolios/:address</p>
+                  <p className="text-muted-foreground">GET /api/v1/radar/events</p>
+                </div>
+                <Button variant="outline" className="mt-4">
+                  View Full API Docs
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </nav>
-
-      <div className="container mx-auto px-6 py-8">
-        <DiscoveryEnginePanel />
       </div>
     </div>
   );
 
   const renderPage = () => {
-    if (selectedVault) {
-      return renderVaultDetail();
-    }
-
     switch (currentPage) {
       case 'landing':
         return renderLanding();
       case 'vaults':
-        return renderVaultExplorer();
-      case 'discovery':
-        return renderDiscovery();
+        return <VaultExplorer onNavigateToVault={navigateToVault} watchlist={safeWatchlist} onToggleWatchlist={toggleWatchlist} renderNav={renderNav} />;
+      case 'vault-detail':
+        return selectedVaultId ? <VaultDetail vaultId={selectedVaultId} onNavigateBack={navigateBack} renderNav={renderNav} watchlist={safeWatchlist} onToggleWatchlist={toggleWatchlist} /> : null;
+      case 'radar':
+        return <YieldRadar onNavigateToVault={navigateToVault} renderNav={renderNav} />;
       case 'portfolio':
-        return renderLanding();
+        return <PortfolioView portfolioId={selectedPortfolioId} onSelectPortfolio={setSelectedPortfolioId} renderNav={renderNav} />;
+      case 'pricing':
+        return renderPricing();
       case 'docs':
-        return renderLanding();
-      case 'settings':
-        return renderLanding();
+        return renderDocs();
       default:
         return renderLanding();
     }
