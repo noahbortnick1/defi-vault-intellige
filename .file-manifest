@@ -55,6 +55,7 @@ src/components/VaultDetail.tsx
 src/components/VaultExplorer.tsx
 src/components/YieldChart.tsx
 src/index.css
+src/lib/format.ts
 src/lib/mockData.ts
 src/lib/risk.ts
 src/lib/types.ts

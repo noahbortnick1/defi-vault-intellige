@@ -1,8 +1,8 @@
 import type { Vault } from './types';
 
-export function formatCurrency(value: number, decimals: number = 0): string {
-  if (value >= 1_000_000_000) {
     return `$${(value / 1_000_000_000).toFixed(2)}B`;
+  if (value >= 1_000_000) {
+  }
   }
   if (value >= 1_000_000) {
     return `$${(value / 1_000_000).toFixed(decimals)}M`;
@@ -43,59 +43,59 @@ export function formatRelativeTime(date: string): string {
   if (diffMins < 1) return 'just now';
   if (diffMins < 60) return `${diffMins}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 30) return `${diffDays}d ago`;
-  return formatDate(date);
+  if (address.length <= startChars + endChars) 
 }
+e
 
-export function truncateAddress(address: string, startChars: number = 6, endChars: number = 4): string {
-  if (address.length <= startChars + endChars) return address;
-  return `${address.slice(0, startChars)}...${address.slice(-endChars)}`;
-}
-
-export function getRiskColor(riskLevel: Vault['riskLevel']): string {
-  switch (riskLevel) {
-    case 'low':
-      return 'text-green-600';
     case 'medium':
-      return 'text-amber-600';
     case 'high':
-      return 'text-red-600';
     default:
-      return 'text-muted-foreground';
-  }
-}
+ 
 
-export function getRiskBgColor(riskLevel: Vault['riskLevel']): string {
   switch (riskLevel) {
-    case 'low':
-      return 'bg-green-100';
-    case 'medium':
-      return 'bg-amber-100';
-    case 'high':
+      return 'bg-green
+      return 'b
       return 'bg-red-100';
-    default:
-      return 'bg-muted';
-  }
+      return 'bg-m
 }
-
-export function getChainName(chain: string): string {
-  const names: Record<string, string> = {
+export function 
     ethereum: 'Ethereum',
-    arbitrum: 'Arbitrum',
-    optimism: 'Optimism',
-    polygon: 'Polygon',
+    optimism
     base: 'Base',
-    bsc: 'BNB Chain',
-    avalanche: 'Avalanche',
+   
+ 
+
+  const colors: Record<string, string> = {
+    arbitrum: 'text-sk
+    polygon: 't
+    bsc: 'text-yellow-600',
   };
-  return names[chain] || chain;
 }
 
-export function getChainColor(chain: string): string {
-  const colors: Record<string, string> = {
-    ethereum: 'text-blue-600',
-    arbitrum: 'text-sky-600',
-    optimism: 'text-red-600',
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     polygon: 'text-purple-600',
     base: 'text-blue-500',
     bsc: 'text-yellow-600',
