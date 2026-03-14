@@ -5,63 +5,55 @@ export interface AggregatorVault {
   symbol: string;
   apy: number;
   apyReward?: number;
-  underlyingTo
-  url?: string
-  apyPct7D?: number
+  tvl: number;
+  url?: string;
+  apyPct7D?: number;
 }
-export interface DiscoveryResu
+
+export interface DiscoveryResult {
+  id: string;
   name: string;
   chain: string;
- 
-
+  address: string;
+  source: DiscoverySource;
+  confidence: number;
   metadata?: Record<string, any>;
+}
 
+export interface VaultContract {
   chain: string;
   address: string;
-  methods: stri
-
- 
-
+  methods: string[];
+  isERC4626: boolean;
 }
+
 export interface YieldSource {
+  type: string;
   description: string;
   apy: number;
+  percentage: number;
+}
 
- 
-
-export interface DiscoveryMeth
+export interface DiscoveryMetrics {
+  totalVaults: number;
+  bySource: Record<DiscoverySource, number>;
+  lastRun: number;
   lastSeen: number;
 }
-export interface RiskBr
-  liquidity: n
- 
 
-export interface RiskFactor
+export interface RiskBreakdown {
+  contractSecurity: number;
+  liquidity: number;
+  protocolStability: number;
+  dependencyRisk: number;
+  governanceRisk: number;
+}
+
+export interface RiskFactor {
+  category: string;
   score: number;
   description: string;
 }
-
-  level: 'low' | 'medium' | 'high'
-  breakdown: Risk
-
-  totalApy: number;
- 
-
-  };
-  sustainability: 'high'
-
-  tvl: number;
-  utilization: nu
-  uniqueDepositors: numbe
-}
-
-  apy: number;
-  strategy: number;
-
-  id: string;
-  status: 'pending' | 
-  completedAt?: number;
- 
 
 export interface RiskAssessment {
   score: number;
@@ -122,4 +114,13 @@ export interface ContractInteraction {
   target: string;
   method: string;
   frequency: number;
+}
+
+export interface DiscoveryJob {
+  id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  startedAt: number;
+  completedAt?: number;
+  vaultsDiscovered: number;
+  errors?: string[];
 }

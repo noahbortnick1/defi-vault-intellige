@@ -1,35 +1,35 @@
-import type { Chain, RiskLevel, RiskBand } from './types';
+import type { Chain, RiskBand } from './types';
 
-    return `$${(value / 1000000000).toFixed(2)}B`;
-  if (value >= 1000000) {
-    return `$${(value / 1000000000).toFixed(2)}B`;
-  i
+export function formatCurrency(value: number, decimals: number = 2): string {
+  if (value >= 1000000000) {
+    return `$${(value / 1000000000).toFixed(decimals)}B`;
+  }
   if (value >= 1000000) {
     return `$${(value / 1000000).toFixed(decimals)}M`;
   }
+  if (value >= 1000) {
+    return `$${(value / 1000).toFixed(decimals)}K`;
+  }
+  return `$${value.toFixed(2)}`;
+}
 
+export function formatPercent(value: number, decimals: number = 2): string {
   return `${value.toFixed(decimals)}%`;
+}
 
+export function formatDate(dateString: string): string {
   const date = new Date(dateString);
- 
-
-}
-export function formatDateTime(dateStri
- 
-
-    hour: '2-digit',
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
   });
-
-  const date = new D
-  const diffMs = now
-  const diffHours = 
-
- 
-
 }
-export function formatAddress(addres
-  return `${address.slice(0, startChars
 
+export function formatDateTime(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: '2-digit',
@@ -62,70 +62,50 @@ export function getChainName(chain: Chain): string {
     'ethereum': 'Ethereum',
     'arbitrum': 'Arbitrum',
     'optimism': 'Optimism',
-    'moderate': 'te
+    'base': 'Base',
+    'polygon': 'Polygon',
+    'bsc': 'BSC'
   };
+  return names[chain] || chain;
 }
-expo
+
+export function getStrategyLabel(strategy: string): string {
+  const labels: Record<string, string> = {
     'lending': 'Lending',
- 
-
-    'real-yield': 'Real Yield',
+    'delta-neutral': 'Delta Neutral',
+    'lp-farming': 'LP Farming',
+    'basis-trade': 'Basis Trade',
+    'staking': 'Staking',
+    'real-yield': 'Real Yield'
   };
+  return labels[strategy] || strategy;
 }
-export function calculateChange(
-  const changePercent = ol
-}
-export function sortByKey<T>(array: T[], key: keyof T,
- 
 
+export function getRiskBgColor(riskBand: RiskBand): string {
+  const colors: Record<RiskBand, string> = {
+    'low': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    'medium': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    'high': 'bg-red-500/10 text-red-400 border-red-500/20'
+  };
+  return colors[riskBand];
+}
+
+export function calculateChange(oldValue: number, newValue: number): number {
+  if (oldValue === 0) return 0;
+  const changePercent = ((newValue - oldValue) / oldValue) * 100;
+  return changePercent;
+}
+
+export function sortByKey<T>(array: T[], key: keyof T, direction: 'asc' | 'desc' = 'asc'): T[] {
+  return [...array].sort((a, b) => {
+    const aVal = a[key];
+    const bVal = b[key];
+    
+    if (typeof aVal === 'number' && typeof bVal === 'number') {
       return direction === 'desc' ? bVal - aVal : aVal - bVal;
+    }
     
-      return direction === 'desc' 
-        : aVal.localeCompare(bVal);
-    
-  })
-
- 
-
-  
-    if (timeout) clearTimeout(timeout);
-  };
-
-  return classes.filter(Boolean)
-
-  return riskScore <= 4.0 && tvl >= 50000000 && verif
-
-
-  
-  return weightedSum / totalValue;
-
-  const totalValue = positions.
-  
-  return weightedSum / totalValue
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
       return direction === 'desc' 
         ? bVal.localeCompare(aVal)
         : aVal.localeCompare(bVal);

@@ -1,117 +1,20 @@
-export type Chain = 'ethereum' | 'arbitrum' | 'optimism' | 'base' | 'polygon' | 'bsc';
+export type Chain = 'ethereum' | 'arbitrum' | 'base' | 'optimism' | 'polygon' | 'bsc';
 
-export type AssetType = 'ETH' | 'WETH' | 'USDC' | 'USDT' | 'DAI' | 'WBTC' | 'stETH' | 'rETH' | 'GHO' | 'sDAI' | 'PT-sDAI' | 'UNI' | 'AAVE';
+export type StrategyType = 'lending' | 'delta-neutral' | 'lp-farming' | 'basis-trade' | 'staking' | 'real-yield';
 
-export type StrategyType = 'lending' | 'lp-farming' | 'delta-neutral' | 'basis-trade' | 'staking' | 'liquid-staking' | 'real-yield' | 'points-farming';
+export type RiskBand = 'low' | 'medium' | 'high';
 
-export type RiskLevel = 'low' | 'medium' | 'high';
+export type VaultStatus = 'active' | 'paused' | 'deprecated';
 
-export type RiskBand = 'conservative' | 'moderate' | 'aggressive';
-
-export type VaultStatus = 'active' | 'new' | 'deprecated' | 'experimental';
-
-export type EventType = 
-  | 'apy-spike' 
-  | 'apy-drop' 
-  | 'tvl-inflow' 
-  | 'tvl-outflow' 
-  | 'new-vault' 
-  | 'risk-change' 
-  | 'governance-change' 
-  | 'incentive-change' 
-  | 'liquidity-warning'
-  | 'audit-published';
+export type EventType = 'apy-spike' | 'tvl-inflow' | 'tvl-outflow' | 'new-vault' | 'risk-change' | 'governance-change' | 'incentive-change' | 'liquidity-deterioration';
 
 export type EventSeverity = 'low' | 'medium' | 'high' | 'critical';
 
-export type DependencyType = 'oracle' | 'protocol' | 'bridge' | 'token' | 'governance';
-
-export type DependencyCriticality = 'low' | 'medium' | 'high' | 'critical';
-
-export type GovernanceType = 'immutable' | 'multisig' | 'dao' | 'admin-controlled' | 'timelock';
-
-export type ReportType = 'vault-dd' | 'comparison' | 'portfolio' | 'market-overview';
-
-export type AlertChannelType = 'email' | 'webhook' | 'dashboard';
+export type ReportType = 'vault' | 'comparison' | 'portfolio';
 
 export type UserRole = 'analyst' | 'portfolio-manager' | 'protocol-team' | 'developer';
 
-export type PortfolioOwnerType = 'dao-treasury' | 'hedge-fund' | 'family-office' | 'protocol-treasury';
-
-export interface Protocol {
-  id: string;
-  name: string;
-  slug: string;
-  category: string;
-  website: string;
-  description: string;
-  chains: Chain[];
-  tvl: number;
-  maturityScore: number;
-  auditSummary: {
-    firms: string[];
-    count: number;
-    lastAuditDate: string;
-  };
-}
-
-export interface YieldSource {
-  type: 'base' | 'trading-fees' | 'incentives' | 'rebase' | 'points';
-  apy: number;
-  token: string;
-  description: string;
-  sustainable: boolean;
-}
-
-export interface RiskFactor {
-  id: string;
-  vaultId: string;
-  category: 'smart-contract' | 'liquidity' | 'market' | 'protocol' | 'governance' | 'dependency';
-  label: string;
-  score: number;
-  weight: number;
-  scoreContribution: number;
-  explanation: string;
-  mitigations: string[];
-}
-
-export interface Dependency {
-  id: string;
-  vaultId: string;
-  protocol: string;
-  type: DependencyType;
-  criticality: DependencyCriticality;
-  description: string;
-  riskImpact: string;
-}
-
-export interface Governance {
-  type: GovernanceType;
-  details: string;
-  timelock?: string;
-  adminControl: boolean;
-  upgradeability: boolean;
-}
-
-export interface Audit {
-  firm: string;
-  date: string;
-  reportUrl: string;
-  scope: string[];
-  issues: {
-    critical: number;
-    high: number;
-    medium: number;
-    low: number;
-  };
-}
-
-export interface RedFlag {
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  category: string;
-  description: string;
-  detectedAt: string;
-}
+export type DiscoveryLayer = 'aggregator' | 'registry' | 'onchain';
 
 export interface Vault {
   id: string;
@@ -120,44 +23,56 @@ export interface Vault {
   protocolId: string;
   protocolName: string;
   chain: Chain;
-  asset: AssetType;
+  asset: string;
   category: string;
   strategyType: StrategyType;
   description: string;
-  strategyDescription: string;
-  
   apy: number;
   realYield: number;
   incentiveYield: number;
   feeYield: number;
-  apyBreakdown: YieldSource[];
-  
   tvl: number;
   liquidityAvailable: number;
-  
   riskScore: number;
-  riskLevel: RiskLevel;
   riskBand: RiskBand;
   liquidityScore: number;
-  
   status: VaultStatus;
-  verified: boolean;
-  institutionalGrade: boolean;
-  
-  inception: string;
   sourceWindow: string;
   updatedAt: string;
-  
-  vaultAddress: string;
-  dependencies: Dependency[];
-  riskFactors: RiskFactor[];
-  governance: Governance;
-  audits: Audit[];
-  redFlags: RedFlag[];
-  
+  dependencyIds: string[];
+  governance: GovernanceInfo;
+  audits: AuditInfo[];
+  redFlags: string[];
   tags: string[];
-  
-  protocol: Protocol;
+  institutionalGrade: boolean;
+  vaultAddress: string;
+}
+
+export interface GovernanceInfo {
+  hasTimelock: boolean;
+  timelockDuration?: string;
+  adminControls: string[];
+  isUpgradeable: boolean;
+  multisigThreshold?: string;
+}
+
+export interface AuditInfo {
+  auditor: string;
+  date: string;
+  reportUrl: string;
+  scope: string;
+}
+
+export interface Protocol {
+  id: string;
+  name: string;
+  category: string;
+  website: string;
+  description: string;
+  chainSupport: Chain[];
+  tvl: number;
+  maturityScore: number;
+  auditSummary: string;
 }
 
 export interface YieldObservation {
@@ -170,24 +85,24 @@ export interface YieldObservation {
   tvl: number;
 }
 
-export interface RadarEvent {
+export interface RiskFactor {
   id: string;
-  type: EventType;
-  severity: EventSeverity;
-  title: string;
-  description: string;
   vaultId: string;
-  vaultName: string;
-  protocolName: string;
-  chain: Chain;
-  timestamp: string;
-  metadata: {
-    oldValue?: number;
-    newValue?: number;
-    change?: number;
-    changePercent?: number;
-  };
-  whyItMatters: string;
+  key: string;
+  label: string;
+  value: number;
+  weight: number;
+  scoreContribution: number;
+  explanation: string;
+}
+
+export interface Dependency {
+  id: string;
+  vaultId: string;
+  name: string;
+  type: 'protocol' | 'oracle' | 'bridge' | 'governance';
+  criticality: 'low' | 'medium' | 'high';
+  notes: string;
 }
 
 export interface Alert {
@@ -196,52 +111,46 @@ export interface Alert {
   type: EventType;
   targetId: string;
   targetType: 'vault' | 'protocol' | 'portfolio';
-  targetName: string;
   condition: string;
   threshold: number;
-  channels: AlertChannelType[];
+  channels: string[];
   enabled: boolean;
-  createdAt: string;
-  lastTriggered?: string;
+}
+
+export interface Portfolio {
+  id: string;
+  name: string;
+  ownerType: 'dao' | 'hedge-fund' | 'family-office';
+  walletAddress: string;
+  netWorth: number;
+  dailyChange: number;
+  totalYield: number;
+  riskScore: number;
+  positions: Position[];
 }
 
 export interface Position {
   id: string;
   portfolioId: string;
   vaultId: string;
-  vaultName: string;
   protocol: string;
-  asset: AssetType;
-  chain: Chain;
-  strategyType: StrategyType;
+  asset: string;
   value: number;
-  apy: number;
-  yieldEarned: number;
   pnl: number;
-  pnlPercent: number;
-  shareOfPortfolio: number;
-  riskScore: number;
-  enteredAt: string;
+  share: number;
+  chain: Chain;
 }
 
-export interface Portfolio {
+export interface Report {
   id: string;
-  name: string;
-  ownerType: PortfolioOwnerType;
-  walletAddress: string;
-  netWorth: number;
-  dailyChange: number;
-  dailyChangePercent: number;
-  totalYield: number;
-  totalYieldPercent: number;
-  riskScore: number;
-  positions: Position[];
-  assetExposure: { asset: AssetType; value: number; percentage: number }[];
-  protocolExposure: { protocol: string; value: number; percentage: number }[];
-  strategyExposure: { strategy: StrategyType; value: number; percentage: number }[];
-  chainExposure: { chain: Chain; value: number; percentage: number }[];
-  createdAt: string;
-  updatedAt: string;
+  type: ReportType;
+  title: string;
+  subjectId: string;
+  subjectType: 'vault' | 'comparison' | 'portfolio';
+  generatedAt: string;
+  author: string;
+  summary: string;
+  sections: ReportSection[];
 }
 
 export interface ReportSection {
@@ -250,60 +159,56 @@ export interface ReportSection {
   data?: any;
 }
 
-export interface Report {
+export interface RadarEvent {
   id: string;
-  type: ReportType;
+  type: EventType;
+  severity: EventSeverity;
+  vaultId: string;
+  vaultName: string;
+  protocol: string;
+  chain: Chain;
   title: string;
-  subjectId: string;
-  subjectType: 'vault' | 'portfolio' | 'comparison';
-  subjectName: string;
-  generatedAt: string;
-  author: string;
-  summary: string;
-  sections: ReportSection[];
-  recommendation?: string;
-  riskAssessment?: string;
-}
-
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatarUrl?: string;
-  organization?: string;
-  watchlist: string[];
-  savedViews: any[];
-  preferences: {
-    defaultChain?: Chain;
-    defaultRiskLevel?: RiskLevel;
-    tableView: 'comfortable' | 'compact' | 'dense';
-    chartPreferences: any;
-  };
-}
-
-export interface ComparisonData {
-  vaults: Vault[];
-  selectedMetrics: string[];
-  highlights: {
-    best: { [key: string]: string };
-    worst: { [key: string]: string };
-  };
+  description: string;
+  whyItMatters: string;
+  timestamp: string;
+  metadata: Record<string, any>;
 }
 
 export interface FilterState {
-  search: string;
   chains: Chain[];
-  assets: AssetType[];
+  assets: string[];
   protocols: string[];
   strategies: StrategyType[];
   riskBands: RiskBand[];
   tvlRange: [number, number];
   apyRange: [number, number];
   institutionalOnly: boolean;
+  search: string;
 }
 
-export interface SortConfig {
-  key: keyof Vault;
-  direction: 'asc' | 'desc';
+export interface DiscoveryStats {
+  totalVaults: number;
+  byLayer: {
+    aggregator: number;
+    registry: number;
+    onchain: number;
+  };
+  byChain: Record<Chain, number>;
+  byProtocol: Record<string, number>;
+  lastUpdate: string;
+  coverage: number;
+}
+
+export interface DiscoveredVault {
+  id: string;
+  name: string;
+  protocol: string;
+  chain: Chain;
+  discoveryLayer: DiscoveryLayer;
+  confidence: number;
+  discoveredAt: string;
+  address: string;
+  tvl: number;
+  apy: number;
+  status: 'pending' | 'verified' | 'rejected';
 }

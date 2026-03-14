@@ -20,7 +20,9 @@ import {
   CurrencyDollar,
   ChartLine,
   Warning,
-  ArrowRight
+  ArrowRight,
+  Database,
+  Cube,
 } from '@phosphor-icons/react';
 import { VAULTS, RADAR_EVENTS, DEMO_PORTFOLIOS, PROTOCOLS } from '@/lib/mockData';
 import { formatCurrency, formatPercent, getRiskBgColor, getChainName, getStrategyLabel } from '@/lib/format';
@@ -29,8 +31,9 @@ import { VaultExplorer } from '@/components/VaultExplorer';
 import { VaultDetail } from '@/components/VaultDetail';
 import { YieldRadar } from '@/components/YieldRadar';
 import { PortfolioView } from '@/components/PortfolioView';
+import { DiscoveryEnginePanel } from '@/components/DiscoveryEnginePanel';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'compare' | 'reports' | 'pricing' | 'docs' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'discovery' | 'compare' | 'reports' | 'pricing' | 'docs' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -100,6 +103,14 @@ function App() {
             >
               <Briefcase className="mr-2" size={18} />
               Portfolio
+            </Button>
+            <Button 
+              variant={currentPage === 'discovery' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('discovery')}
+              size="sm"
+            >
+              <MagnifyingGlass className="mr-2" size={18} />
+              Discovery
             </Button>
             <Button 
               variant={currentPage === 'pricing' ? 'secondary' : 'ghost'}
@@ -179,6 +190,19 @@ function App() {
 
       <div className="container mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <Card className="border-2 border-accent/50 hover:border-accent transition-colors bg-gradient-to-br from-accent/5 to-background">
+            <CardHeader>
+              <MagnifyingGlass className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Automated Vault Discovery</CardTitle>
+              <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Technical Moat</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Three-layer discovery system automatically finds 90-95% of vaults across aggregators, protocol registries, and onchain patterns. No manual curation.
+              </p>
+            </CardContent>
+          </Card>
+
           <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
             <CardHeader>
               <ShieldCheck className="text-accent mb-3" size={40} weight="duotone" />
@@ -202,19 +226,59 @@ function App() {
               </p>
             </CardContent>
           </Card>
-
-          <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
-            <CardHeader>
-              <Briefcase className="text-accent mb-3" size={40} weight="duotone" />
-              <CardTitle className="text-xl">Portfolio Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Monitor treasury exposure across assets, protocols, and strategies. Track concentration risks and generate institutional reports.
-              </p>
-            </CardContent>
-          </Card>
         </div>
+
+        <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-background mb-16">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl mb-2">Discovery Engine</CardTitle>
+                <CardDescription>
+                  The scalable advantage: automatic vault indexing across all major chains
+                </CardDescription>
+              </div>
+              <Button 
+                onClick={() => setCurrentPage('discovery')} 
+                variant="outline"
+                className="border-primary/50 hover:bg-primary/10"
+              >
+                <Lightning className="mr-2" size={18} />
+                View Discovery System
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Database size={24} className="text-blue-400" weight="fill" />
+                  <h4 className="font-semibold">Layer 1: Aggregators</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Bootstrap from DeFiLlama yields API, protocol registries, and curated lists. Fast initial coverage.
+                </p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Cube size={24} className="text-purple-400" weight="fill" />
+                  <h4 className="font-semibold">Layer 2: Registries</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Index protocol registries (Yearn, Beefy, Morpho, Pendle) via onchain contract calls for comprehensive coverage.
+                </p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <ChartBar size={24} className="text-green-400" weight="fill" />
+                  <h4 className="font-semibold">Layer 3: Onchain</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Detect ERC4626 patterns and vault signatures directly onchain. Discover vaults competitors miss.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="border-2 border-accent/20 bg-gradient-to-br from-accent/5 to-background">
           <CardHeader>
@@ -586,6 +650,15 @@ function App() {
     </div>
   );
 
+  const renderDiscovery = () => (
+    <div className="min-h-screen bg-background">
+      {renderNav()}
+      <div className="container mx-auto px-6 py-12">
+        <DiscoveryEnginePanel />
+      </div>
+    </div>
+  );
+
   const renderPage = () => {
     switch (currentPage) {
       case 'landing':
@@ -598,6 +671,8 @@ function App() {
         return <YieldRadar onNavigateToVault={navigateToVault} renderNav={renderNav} />;
       case 'portfolio':
         return <PortfolioView portfolioId={selectedPortfolioId} onSelectPortfolio={setSelectedPortfolioId} renderNav={renderNav} />;
+      case 'discovery':
+        return renderDiscovery();
       case 'pricing':
         return renderPricing();
       case 'docs':
