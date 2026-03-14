@@ -210,7 +210,7 @@ function App() {
           <div>
             <h2 className="text-3xl font-bold mb-2">Vault Explorer</h2>
             <p className="text-muted-foreground">
-              Discover and analyze yield vaults across {vaults.length} protocols and chains
+              Discover and analyze yield vaults across {vaults?.length || 0} protocols and chains
             </p>
           </div>
 

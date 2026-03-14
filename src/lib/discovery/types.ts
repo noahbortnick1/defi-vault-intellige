@@ -1,93 +1,75 @@
 export type DiscoverySource = 'aggregator' | 'registry' | 'onchain';
 
+export interface AggregatorVault {
+  pool: string;
   chain: string;
-  source: DiscoverySour
-  chain: string;
+  project: string;
+  symbol: string;
+  tvlUsd: number;
+  apy: number;
+  apyBase?: number;
+  apyReward?: number;
+  rewardTokens?: string[];
+  underlyingTokens?: string[];
+  poolMeta?: string;
+  url?: string;
+  apyPct1D?: number;
+  apyPct7D?: number;
+  apyPct30D?: number;
+}
+
+export interface DiscoveryResult {
+  id: string;
+  name: string;
   protocol: string;
+  chain: string;
   source: DiscoverySource;
   confidence: number;
-export interface Aggreg
-  chain: string;
- 
-
-  apyReward?: number;
-  underlyingTok
-  url?: string;
-  apyPct7D?: numbe
+  tvl: number;
+  apy: number;
+  discoveredAt: number;
+  metadata?: Record<string, any>;
 }
-export interface 
-  chain: strin
-  vaultListMethod: 
 
+export interface RegistryContract {
+  chain: string;
+  vaultListMethod: string;
+  address: string;
   name: string;
   methods: string[];
 }
-export interfac
-  type: 'vault_disco
-  status: 'pending' 
-  completedAt?: numbe
- 
 
-  type: 'base' | 'trading_fees' | '
-  description: 
-  sustainable: b
-
-  primary: string;
- 
-
+export interface DiscoveryTask {
+  type: 'vault_discovery' | 'metadata_update' | 'risk_assessment';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  completedAt?: number;
+  error?: string;
 }
-export interfac
-  method: string;
-  lastSeen: number;
 
- 
-
-    smartContract: number;
-    dependenc
-    centralization: number;
-}
-export interface RiskFactor {
-  score: number;
+export interface YieldSource {
+  type: 'base' | 'trading_fees' | 'incentives' | 'rebases';
   description: string;
-}
-export interface 
- 
-
-    rebases: number;
-  realYieldPercentage: number;
-}
-export interface Vault
+  sustainable: boolean;
   apy: number;
-  volume24h: number;
- 
-
-  tvl: number;
-  risk: number;
 }
 
+export interface Protocol {
+  primary: string;
+  dependencies: string[];
+}
 
-
-
-
-
-
-
+export interface DiscoveryMethod {
   method: string;
-  frequency: number;
   lastSeen: number;
+  frequency: number;
 }
 
-export interface RiskAssessment {
-  score: number;
-  level: 'low' | 'medium' | 'high';
-  factors: RiskFactor[];
-  breakdown: {
-    smartContract: number;
-    liquidity: number;
-    dependency: number;
-    market: number;
-    centralization: number;
-  };
+export interface RiskBreakdown {
+  smartContract: number;
+  liquidity: number;
+  dependency: number;
+  market: number;
+  centralization: number;
 }
 
 export interface RiskFactor {
@@ -96,6 +78,13 @@ export interface RiskFactor {
   weight: number;
   description: string;
   mitigations: string[];
+}
+
+export interface RiskAssessment {
+  score: number;
+  level: 'low' | 'medium' | 'high';
+  factors: RiskFactor[];
+  breakdown: RiskBreakdown;
 }
 
 export interface YieldDecomposition {
@@ -124,4 +113,40 @@ export interface UpdateFrequency {
   apy: number;
   risk: number;
   strategy: number;
+}
+
+export interface IndexerJob {
+  id: string;
+  type: 'vault_discovery' | 'metadata_update' | 'risk_assessment';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  startedAt?: number;
+  completedAt?: number;
+  error?: string;
+  result?: any;
+}
+
+export interface VaultPattern {
+  name: string;
+  methods: string[];
+  eventSignatures: string[];
+}
+
+export interface ProtocolRegistry {
+  name: string;
+  address: string;
+  chain: string;
+  vaultListMethod: string;
+  methods: string[];
+}
+
+export interface StrategyClassification {
+  type: string;
+  confidence: number;
+  indicators: string[];
+}
+
+export interface ContractInteraction {
+  target: string;
+  method: string;
+  frequency: number;
 }
