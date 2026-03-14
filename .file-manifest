@@ -53,6 +53,7 @@ packages/spark-tools/package.json
 runtime.config.json
 spark.meta.json
 src/App.tsx
+src/ErrorFallback.tsx
 src/components/ApiDocs.tsx
 src/components/ArchitectureVisualization.tsx
 src/components/DiscoveryEnginePanel.tsx

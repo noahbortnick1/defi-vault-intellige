@@ -1,84 +1,67 @@
 export type DiscoverySource = 'aggregator' | 'registry' | 'onchain';
 
 export interface AggregatorVault {
-  pool: string;
   chain: string;
-  project: string;
   symbol: string;
-  tvlUsd: number;
   apy: number;
-  apyBase?: number;
   apyReward?: number;
-  rewardTokens?: string[];
-  underlyingTokens?: string[];
-  poolMeta?: string;
-  url?: string;
-  apyPct1D?: number;
-  apyPct7D?: number;
-  apyPct30D?: number;
+  underlyingTo
+  url?: string
+  apyPct7D?: number
 }
-
-export interface DiscoveryResult {
-  id: string;
+export interface DiscoveryResu
   name: string;
-  protocol: string;
   chain: string;
-  source: DiscoverySource;
-  confidence: number;
-  tvl: number;
-  apy: number;
-  discoveredAt: number;
+ 
+
   metadata?: Record<string, any>;
-}
 
-export interface RegistryContract {
   chain: string;
-  vaultListMethod: string;
   address: string;
-  name: string;
-  methods: string[];
-}
+  methods: stri
 
-export interface DiscoveryTask {
-  type: 'vault_discovery' | 'metadata_update' | 'risk_assessment';
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  completedAt?: number;
-  error?: string;
-}
+ 
 
+}
 export interface YieldSource {
-  type: 'base' | 'trading_fees' | 'incentives' | 'rebases';
   description: string;
-  sustainable: boolean;
   apy: number;
-}
 
-export interface Protocol {
-  primary: string;
-  dependencies: string[];
-}
+ 
 
-export interface DiscoveryMethod {
-  method: string;
+export interface DiscoveryMeth
   lastSeen: number;
-  frequency: number;
 }
+export interface RiskBr
+  liquidity: n
+ 
 
-export interface RiskBreakdown {
-  smartContract: number;
-  liquidity: number;
-  dependency: number;
-  market: number;
-  centralization: number;
-}
-
-export interface RiskFactor {
-  category: string;
+export interface RiskFactor
   score: number;
-  weight: number;
   description: string;
-  mitigations: string[];
 }
+
+  level: 'low' | 'medium' | 'high'
+  breakdown: Risk
+
+  totalApy: number;
+ 
+
+  };
+  sustainability: 'high'
+
+  tvl: number;
+  utilization: nu
+  uniqueDepositors: numbe
+}
+
+  apy: number;
+  strategy: number;
+
+  id: string;
+  status: 'pending' | 
+  completedAt?: number;
+ 
 
 export interface RiskAssessment {
   score: number;
@@ -113,16 +96,6 @@ export interface UpdateFrequency {
   apy: number;
   risk: number;
   strategy: number;
-}
-
-export interface IndexerJob {
-  id: string;
-  type: 'vault_discovery' | 'metadata_update' | 'risk_assessment';
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  startedAt?: number;
-  completedAt?: number;
-  error?: string;
-  result?: any;
 }
 
 export interface VaultPattern {
