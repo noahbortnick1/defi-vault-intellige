@@ -17,6 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import { DiscoveryEngine } from '@/lib/discovery';
 import type { DiscoveryResult, IndexerJob } from '@/lib/discovery';
+import { ArchitectureVisualization } from '@/components/ArchitectureVisualization';
 
 export function DiscoveryEnginePanel() {
   const [engine] = useState(() => new DiscoveryEngine());
@@ -278,84 +279,7 @@ export function DiscoveryEnginePanel() {
         </TabsContent>
 
         <TabsContent value="architecture" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Three-Layer Discovery Architecture</CardTitle>
-              <CardDescription>
-                How the engine automatically finds 90-95% of vaults
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 border-l-4 border-blue-500 bg-blue-50">
-                  <Database size={32} weight="fill" className="text-blue-600 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Layer 1: Aggregators</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Fastest way to bootstrap. Pull from DeFiLlama, protocol registries,
-                      and curated vault lists.
-                    </p>
-                    <div className="space-y-1 text-sm">
-                      <p className="font-mono">• DeFiLlama yields API</p>
-                      <p className="font-mono">• Protocol registries</p>
-                      <p className="font-mono">• Curated vault lists</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4 p-4 border-l-4 border-purple-500 bg-purple-50">
-                  <Cube size={32} weight="fill" className="text-purple-600 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Layer 2: Protocol Registries</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Many protocols expose vault registries onchain. Read these contracts
-                      directly.
-                    </p>
-                    <div className="space-y-1 text-sm">
-                      <p className="font-mono">• Yearn Registry: getVaults()</p>
-                      <p className="font-mono">• Morpho: getMarkets()</p>
-                      <p className="font-mono">• Pendle: getAllMarkets()</p>
-                      <p className="font-mono">• Enzyme: getVaultAddresses()</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4 p-4 border-l-4 border-green-500 bg-green-50">
-                  <ChartBar size={32} weight="fill" className="text-green-600 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">
-                      Layer 3: Onchain Detection (The Moat)
-                    </h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Detect vault contracts by patterns like ERC4626, share token vaults,
-                      and strategy contracts.
-                    </p>
-                    <div className="space-y-1 text-sm">
-                      <p className="font-mono">• ERC4626 interface detection</p>
-                      <p className="font-mono">• Yearn V2 pattern matching</p>
-                      <p className="font-mono">• Compound market detection</p>
-                      <p className="font-mono">• Aave aToken identification</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <h4 className="font-semibold mb-3">Discovery Pipeline</h4>
-                <div className="flex items-center gap-2 text-sm font-mono bg-muted p-4 rounded-lg overflow-x-auto">
-                  <span>Aggregator seed</span>
-                  <span>→</span>
-                  <span>Protocol registry scanner</span>
-                  <span>→</span>
-                  <span>Onchain vault detector</span>
-                  <span>→</span>
-                  <span>Strategy classifier</span>
-                  <span>→</span>
-                  <span className="text-accent font-bold">Vault database</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ArchitectureVisualization />
         </TabsContent>
       </Tabs>
     </div>

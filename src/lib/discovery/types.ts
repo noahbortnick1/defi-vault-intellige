@@ -1,7 +1,7 @@
 export type DiscoverySource = 'aggregator' | 'registry' | 'onchain';
 
-  chain: string;
-  source: DiscoverySour
+export interface DiscoveryResult {
+  vaultAddress: string;
   chain: string;
   protocol: string;
   source: DiscoverySource;
@@ -35,44 +35,93 @@ export interface ProtocolRegistry {
   vaultListMethod: string;
 }
 
+export interface VaultPattern {
+  name: string;
+  interfaces: string[];
+  methods: string[];
+  confidence: number;
 }
-export interfac
-  type: 'vault_discover
-  status: 'pending' 
-  completedAt?: numbe
- 
 
-  type: 'base' | 'trading_fee
-  token?: str
+export interface IndexerJob {
+  id: string;
+  type: 'vault_discovery' | 'yield_update' | 'risk_update' | 'strategy_classification';
+  chain: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  startedAt?: number;
+  completedAt?: number;
+  vaultsProcessed?: number;
+  error?: string;
+}
+
+export interface YieldSource {
+  type: 'base' | 'trading_fees' | 'lending' | 'staking' | 'incentives' | 'rebases';
+  apy: number;
+  description: string;
+  token?: string;
   sustainable: boolean;
-
-  primary: string;
-  dependencies: strin
-  yieldSources: YieldSo
 }
-export interface 
- 
 
+export interface StrategyClassification {
+  primary: string;
+  secondary?: string;
+  dependencies: string[];
+  riskFactors: string[];
+  yieldSources: YieldSource[];
+  confidence: number;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export interface ContractInteraction {
+  protocol: string;
   method: string;
   frequency: number;
   lastSeen: number;
+}
+
+export interface RiskAssessment {
+  score: number;
+  level: 'low' | 'medium' | 'high';
+  factors: RiskFactor[];
+  breakdown: {
+    smartContract: number;
+    liquidity: number;
+    dependency: number;
+    market: number;
+    centralization: number;
+  };
+}
+
+export interface RiskFactor {
+  category: string;
+  score: number;
+  weight: number;
+  description: string;
+  mitigations: string[];
+}
+
+export interface YieldDecomposition {
+  totalApy: number;
+  components: {
+    baseYield: number;
+    tradingFees: number;
+    incentives: number;
+    rebases: number;
+  };
+  realYieldPercentage: number;
+  sustainability: 'high' | 'medium' | 'low';
+}
+
+export interface VaultMetrics {
+  tvl: number;
+  apy: number;
+  utilization: number;
+  volume24h: number;
+  uniqueDepositors: number;
+  averageDepositSize: number;
+}
+
+export interface UpdateFrequency {
+  tvl: number;
+  apy: number;
+  risk: number;
+  strategy: number;
 }
