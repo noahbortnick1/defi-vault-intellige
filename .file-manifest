@@ -16,7 +16,10 @@ MIGRATION.md
 PRD.md
 PROJECT_STRUCTURE.md
 README.md
+README_YIELD_TERMINAL.md
 REFACTORING_SUMMARY.md
+YIELD_TERMINAL_ARCHITECTURE.md
+YIELD_TERMINAL_PRD.md
 backend/.env.example
 backend/Dockerfile
 backend/README.md
@@ -58,10 +61,12 @@ src/components/ApiDocs.tsx
 src/components/ArchitectureVisualization.tsx
 src/components/DiscoveryEnginePanel.tsx
 src/components/MetricCard.tsx
+src/components/PortfolioView.tsx
 src/components/RiskBadge.tsx
 src/components/VaultDetail.tsx
 src/components/VaultExplorer.tsx
 src/components/YieldChart.tsx
+src/components/YieldRadar.tsx
 src/index.css
 src/lib/discovery/aggregator.ts
 src/lib/discovery/engine.ts
