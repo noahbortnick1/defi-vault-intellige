@@ -1,7 +1,7 @@
 export type DiscoverySource = 'aggregator' | 'registry' | 'onchain';
 
-export interface DiscoveryResult {
-  vaultAddress: string;
+  chain: string;
+  source: DiscoverySour
   chain: string;
   protocol: string;
   source: DiscoverySource;
@@ -35,43 +35,43 @@ export interface ProtocolRegistry {
   vaultListMethod: string;
 }
 
-export interface VaultPattern {
-  name: string;
-  interfaces: string[];
-  methods: string[];
-  confidence: number;
 }
+export interfac
+  type: 'vault_discover
+  status: 'pending' 
+  completedAt?: numbe
+ 
 
-export interface IndexerJob {
-  id: string;
-  type: 'vault_discovery' | 'yield_update' | 'risk_update' | 'strategy_classification';
-  chain: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  startedAt?: number;
-  completedAt?: number;
-  vaultsProcessed?: number;
-  error?: string;
-}
-
-export interface YieldSource {
-  type: 'base' | 'trading_fees' | 'incentives' | 'lending' | 'staking' | 'rebase';
-  apy: number;
-  token?: string;
-  description: string;
+  type: 'base' | 'trading_fee
+  token?: str
   sustainable: boolean;
-}
 
-export interface StrategyClassification {
   primary: string;
-  secondary?: string;
-  dependencies: string[];
-  riskFactors: string[];
-  yieldSources: YieldSource[];
-  confidence: number;
+  dependencies: strin
+  yieldSources: YieldSo
 }
+export interface 
+ 
 
-export interface ContractInteraction {
-  protocol: string;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   method: string;
   frequency: number;
   lastSeen: number;
