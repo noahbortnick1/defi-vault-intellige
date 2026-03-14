@@ -12,14 +12,17 @@ DISCOVERY_ENGINE_ARCHITECTURE.md
 DISCOVERY_ENGINE_COMPLETE.md
 DISCOVERY_ENGINE_QUICK_START.md
 DISCOVERY_ENGINE_SUMMARY.md
+IMPLEMENTATION_SUMMARY.md
 MIGRATION.md
 PRD.md
 PROJECT_STRUCTURE.md
 README.md
 README_YIELD_TERMINAL.md
+README_YIELD_TERMINAL_SPARK.md
 REFACTORING_SUMMARY.md
 YIELD_TERMINAL_ARCHITECTURE.md
 YIELD_TERMINAL_PRD.md
+YIELD_TERMINAL_SPARK_PRD.md
 backend/.env.example
 backend/Dockerfile
 backend/README.md
@@ -76,6 +79,7 @@ src/lib/discovery/registry.ts
 src/lib/discovery/strategy.ts
 src/lib/discovery/types.ts
 src/lib/format.ts
+src/lib/formatters.ts
 src/lib/mockData.ts
 src/lib/risk.ts
 src/lib/types.ts
