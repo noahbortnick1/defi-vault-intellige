@@ -1,0 +1,14 @@
+.spark-initial-sha
+PRD.md
+index.html
+src/App.tsx
+src/components/ApiDocs.tsx
+src/components/MetricCard.tsx
+src/components/RiskBadge.tsx
+src/components/VaultDetail.tsx
+src/components/VaultExplorer.tsx
+src/components/YieldChart.tsx
+src/index.css
+src/lib/mockData.ts
+src/lib/risk.ts
+src/lib/types.ts
