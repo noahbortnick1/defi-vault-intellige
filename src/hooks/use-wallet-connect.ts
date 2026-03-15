@@ -2,19 +2,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { isValidAddress } from '@/lib/web3Rpc';
 import type { Chain } from '@/lib/types';
 
-interface WalletConnection {
+  address: string;
   address: string;
   isConnected: boolean;
   chain: Chain;
   provider: 'metamask' | 'manual';
-}
+i
 
-interface EthereumProvider {
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-  on: (event: string, handler: (...args: unknown[]) => void) => void;
-  removeListener: (event: string, handler: (...args: unknown[]) => void) => void;
   isMetaMask?: boolean;
-}
+
+  interface Window {
+  }
+
+ 
 
 declare global {
   interface Window {
@@ -22,54 +22,54 @@ declare global {
   }
 }
 
-const CHAIN_ID_TO_NAME: Record<number, Chain> = {
-  1: 'ethereum',
-  42161: 'arbitrum',
-  10: 'optimism',
-  8453: 'base',
-  137: 'polygon',
-  56: 'bsc',
-};
-
-const CHAIN_IDS: Record<Chain, number> = {
-  ethereum: 1,
   arbitrum: 42161,
-  optimism: 10,
   base: 8453,
-  polygon: 137,
   bsc: 56,
-};
 
-export function useWalletConnect() {
-  const [connection, setConnection] = useState<WalletConnection | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [connec
+  const [error, s
+  const safe
+  
 
-  const safeConnection = connection || null;
-
-  const detectProvider = useCallback((): EthereumProvider | null => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      return window.ethereum as EthereumProvider;
-    }
     return null;
+
+    return CHAIN_I
+
+    setIsConn
+
+      cons
+  
+
+        method: 'eth_requestAccounts
+
+        throw new Error('No accounts found. Please connect
+
+
+
+
+      setConnection({
+        isConnected: true,
+        provider: 'metamask',
+
+    } catch (err
   }, []);
 
-  const getChainName = useCallback((chainId: number): Chain => {
-    return CHAIN_ID_TO_NAME[chainId] || 'ethereum';
-  }, []);
 
-  const connectMetaMask = useCallback(async (): Promise<void> => {
-    setIsConnecting(true);
     setError(null);
-
     try {
-      const provider = detectProvider();
-      if (!provider) {
-        throw new Error('MetaMask is not installed. Please install MetaMask to continue.');
-      }
 
-      const accounts = await provider.request({
-        method: 'eth_requestAccounts',
+      }
+      const targetChainId 
+
+
+      });
+      setConnection((current) =>
+          ...current,
+        } : null
+    } c
+
+        const message = err instanceof Error ? 
+      }
       }) as string[];
 
       if (!accounts || accounts.length === 0) {
@@ -90,7 +90,7 @@ export function useWalletConnect() {
         provider: 'metamask',
       });
 
-      setIsConnecting(false);
+    setError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to connect wallet';
       setError(message);
@@ -110,26 +110,26 @@ export function useWalletConnect() {
       const targetChainId = CHAIN_IDS[chain];
       const chainIdHex = `0x${targetChainId.toString(16)}`;
 
-      await provider.request({
+          setConnection({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: chainIdHex }],
       });
 
       setConnection((current) =>
-        current ? {
+      }
           ...current,
           chain,
         } : null
-      );
+  useEff
     } catch (err: any) {
       if (err.code === 4902) {
         setError(`Chain ${chain} is not added to MetaMask. Please add it manually.`);
-      } else {
+      }
         const message = err instanceof Error ? err.message : 'Failed to switch chain';
         setError(message);
       }
-    }
-  }, [detectProvider]);
+     
+
 
   const connectManual = useCallback((address: string): void => {
     setError(null);
@@ -137,7 +137,7 @@ export function useWalletConnect() {
     if (!isValidAddress(address)) {
       setError('Invalid Ethereum address');
       return;
-    }
+    d
 
     const normalizedAddress = address.toLowerCase();
 
@@ -160,9 +160,9 @@ export function useWalletConnect() {
       if (!provider) return;
 
       try {
-        const accounts = await provider.request({
+
           method: 'eth_accounts',
-        }) as string[];
+
 
         if (accounts && accounts.length > 0) {
           const chainIdHex = await provider.request({
@@ -178,13 +178,13 @@ export function useWalletConnect() {
             chain,
             provider: 'metamask',
           });
-        }
+
       } catch (err) {
         console.error('Failed to check existing connection:', err);
       }
-    };
 
-    checkConnection();
+
+
   }, [detectProvider, getChainName]);
 
   useEffect(() => {
@@ -202,11 +202,11 @@ export function useWalletConnect() {
             address: accountList[0],
           } : null
         );
-      }
+
     };
 
     const handleChainChanged = (chainIdHex: unknown) => {
-      const chainId = parseInt(chainIdHex as string, 16);
+
       const chain = getChainName(chainId);
 
       setConnection((current) =>
@@ -215,30 +215,30 @@ export function useWalletConnect() {
           chain,
         } : null
       );
-    };
+
 
     provider.on('accountsChanged', handleAccountsChanged);
     provider.on('chainChanged', handleChainChanged);
 
-    return () => {
+
       provider.removeListener('accountsChanged', handleAccountsChanged);
       provider.removeListener('chainChanged', handleChainChanged);
     };
   }, [detectProvider, safeConnection, disconnect, getChainName]);
 
-  const isMetaMaskInstalled = useCallback((): boolean => {
-    const provider = detectProvider();
-    return provider?.isMetaMask === true;
-  }, [detectProvider]);
+
+
+
+
 
   return {
-    connection: safeConnection,
+
     isConnecting,
     error,
     connectMetaMask,
     switchChain,
     connectManual,
-    disconnect,
+
     isMetaMaskInstalled,
   };
-}
+
