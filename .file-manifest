@@ -7,6 +7,8 @@
 .gitignore
 .spark-initial-sha
 .spark-workbench-id
+API_IMPLEMENTATION.md
+API_SCHEMA.md
 DISCOVERY_ENGINE.md
 DISCOVERY_ENGINE_ARCHITECTURE.md
 DISCOVERY_ENGINE_COMPLETE.md
@@ -68,6 +70,12 @@ runtime.config.json
 spark.meta.json
 src/App.tsx
 src/ErrorFallback.tsx
+src/api/client.ts
+src/api/index.ts
+src/api/seedData.ts
+src/api/service.ts
+src/api/types.ts
+src/components/ApiDemo.tsx
 src/components/ApiDocs.tsx
 src/components/ArchitectureVisualization.tsx
 src/components/DiscoveryEnginePanel.tsx
