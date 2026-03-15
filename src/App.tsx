@@ -33,8 +33,9 @@ import { YieldRadar } from '@/components/YieldRadar';
 import { PortfolioView } from '@/components/PortfolioView';
 import { PortfolioApiView } from '@/components/PortfolioApiView';
 import { DiscoveryEnginePanel } from '@/components/DiscoveryEnginePanel';
+import { WalletTracker } from '@/components/WalletTracker';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'compare' | 'reports' | 'pricing' | 'docs' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'wallet-tracker' | 'compare' | 'reports' | 'pricing' | 'docs' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -112,6 +113,14 @@ function App() {
             >
               <MagnifyingGlass className="mr-2" size={18} />
               Discovery
+            </Button>
+            <Button 
+              variant={currentPage === 'wallet-tracker' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('wallet-tracker')}
+              size="sm"
+            >
+              <Vault className="mr-2" size={18} />
+              Wallet Tracker
             </Button>
             <Button 
               variant={currentPage === 'pricing' ? 'secondary' : 'ghost'}
@@ -660,6 +669,15 @@ function App() {
     </div>
   );
 
+  const renderWalletTracker = () => (
+    <div className="min-h-screen bg-background">
+      {renderNav()}
+      <div className="container mx-auto px-6 py-12">
+        <WalletTracker />
+      </div>
+    </div>
+  );
+
   const renderPage = () => {
     switch (currentPage) {
       case 'landing':
@@ -676,6 +694,8 @@ function App() {
         return <PortfolioApiView renderNav={renderNav} />;
       case 'discovery':
         return renderDiscovery();
+      case 'wallet-tracker':
+        return renderWalletTracker();
       case 'pricing':
         return renderPricing();
       case 'docs':

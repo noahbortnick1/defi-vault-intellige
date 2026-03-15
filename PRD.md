@@ -61,6 +61,13 @@ This is a multi-page institutional analytics platform with extensive data visual
 - **Progression**: Browse doc sections → Read methodology → Review API endpoints → Copy integration examples
 - **Success criteria**: Clear explanations, code examples, searchable content
 
+### Onchain Wallet Tracker
+- **Functionality**: Real-time onchain wallet tracking with Web3 RPC integration, scans wallet addresses for token balances and vault positions across multiple chains
+- **Purpose**: Enable direct onchain position monitoring without relying on external APIs, providing trustless verification of wallet holdings
+- **Trigger**: User navigates to Wallet Tracker from main nav and inputs wallet address
+- **Progression**: Enter wallet address → Select chain → Scan via RPC → Display native balance, token holdings, and vault positions → Refresh data → Track multiple wallets
+- **Success criteria**: Sub-10 second wallet scans, accurate balance retrieval via RPC, support for Ethereum/Arbitrum/Base/Optimism/Polygon/BSC, persistent wallet tracking list
+
 ### Settings & Profile
 - **Functionality**: User preferences, alert configuration, API key management, workspace settings
 - **Purpose**: Customize user experience and manage integrations
