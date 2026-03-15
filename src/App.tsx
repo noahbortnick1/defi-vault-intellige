@@ -41,8 +41,9 @@ import { VaultReportView } from '@/components/VaultReportView';
 import { PortfolioReportView } from '@/components/PortfolioReportView';
 import { AIPortfolioGenerator } from '@/components/AIPortfolioGenerator';
 import { ApiDemo } from '@/components/ApiDemo';
+import { PortfolioWithWallet } from '@/components/PortfolioWithWallet';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -116,8 +117,8 @@ function App() {
               Rankings
             </Button>
             <Button 
-              variant={currentPage === 'portfolio' || currentPage === 'portfolio-api' || currentPage === 'portfolio-report' || currentPage === 'ai-portfolio' ? 'secondary' : 'ghost'}
-              onClick={() => setCurrentPage('portfolio-api')}
+              variant={currentPage === 'portfolio' || currentPage === 'portfolio-api' || currentPage === 'portfolio-wallet' || currentPage === 'portfolio-report' || currentPage === 'ai-portfolio' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('portfolio-wallet')}
               size="sm"
             >
               <Briefcase className="mr-2" size={18} />
@@ -839,6 +840,8 @@ function App() {
         return <PortfolioView portfolioId={selectedPortfolioId} onSelectPortfolio={setSelectedPortfolioId} renderNav={renderNav} />;
       case 'portfolio-api':
         return <PortfolioApiView renderNav={renderNav} />;
+      case 'portfolio-wallet':
+        return <PortfolioWithWallet renderNav={renderNav} />;
       case 'ai-portfolio':
         return (
           <div className="min-h-screen bg-background">
