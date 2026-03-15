@@ -7,6 +7,7 @@
 .gitignore
 .spark-initial-sha
 .spark-workbench-id
+AI_REPORT_GENERATION.md
 API_IMPLEMENTATION.md
 API_INTEGRATION.md
 API_SCHEMA.md
@@ -78,6 +79,7 @@ src/api/service.ts
 src/api/types.ts
 src/components/ApiDemo.tsx
 src/components/ApiDocs.tsx
+src/components/ApiReportViewer.tsx
 src/components/ArchitectureVisualization.tsx
 src/components/DiscoveryEnginePanel.tsx
 src/components/MetricCard.tsx
@@ -94,6 +96,7 @@ src/components/YieldChart.tsx
 src/components/YieldRadar.tsx
 src/hooks/use-rankings-api.ts
 src/hooks/use-vault-api.ts
+src/hooks/use-vault-report.ts
 src/hooks/use-vaults-api.ts
 src/index.css
 src/lib/discovery/aggregator.ts
@@ -108,6 +111,7 @@ src/lib/formatters.ts
 src/lib/mockData.ts
 src/lib/portfolioApi.ts
 src/lib/ranking.ts
+src/lib/reportApi.ts
 src/lib/reports.ts
 src/lib/risk.ts
 src/lib/types.ts
