@@ -13,6 +13,7 @@ AI_REPORT_GENERATION.md
 API_IMPLEMENTATION.md
 API_INTEGRATION.md
 API_SCHEMA.md
+BLOCKCHAIN_WALLET_SUMMARY.md
 DISCOVERY_ENGINE.md
 DISCOVERY_ENGINE_ARCHITECTURE.md
 DISCOVERY_ENGINE_COMPLETE.md
@@ -31,6 +32,7 @@ README_RANKINGS_REPORTS.md
 README_YIELD_TERMINAL.md
 README_YIELD_TERMINAL_SPARK.md
 REFACTORING_SUMMARY.md
+WALLET_INTEGRATION.md
 WALLET_TRACKER_README.md
 YIELD_TERMINAL_ARCHITECTURE.md
 YIELD_TERMINAL_PRD.md
@@ -92,12 +94,14 @@ src/components/PortfolioApiView.tsx
 src/components/PortfolioFinancialsView.tsx
 src/components/PortfolioReportView.tsx
 src/components/PortfolioView.tsx
+src/components/PortfolioWithWallet.tsx
 src/components/RankingsPage.tsx
 src/components/RiskBadge.tsx
 src/components/VaultDetail.tsx
 src/components/VaultExplorer.tsx
 src/components/VaultFinancialsView.tsx
 src/components/VaultReportView.tsx
+src/components/WalletConnect.tsx
 src/components/WalletTracker.tsx
 src/components/YieldChart.tsx
 src/components/YieldRadar.tsx
@@ -105,6 +109,7 @@ src/hooks/use-rankings-api.ts
 src/hooks/use-vault-api.ts
 src/hooks/use-vault-report.ts
 src/hooks/use-vaults-api.ts
+src/hooks/use-wallet-connect.ts
 src/index.css
 src/lib/aiPortfolioReport.ts
 src/lib/discovery/aggregator.ts
