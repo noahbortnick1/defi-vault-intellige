@@ -114,6 +114,8 @@ src/lib/discovery/types.ts
 src/lib/format.ts
 src/lib/formatters.ts
 src/lib/mockData.ts
+src/lib/pdfExport.ts
+src/lib/pdfExportSimple.ts
 src/lib/portfolioApi.ts
 src/lib/ranking.ts
 src/lib/reportApi.ts
