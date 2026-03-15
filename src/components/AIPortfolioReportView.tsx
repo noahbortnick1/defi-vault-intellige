@@ -22,6 +22,7 @@ import {
   XCircle,
   ArrowRight,
   Download,
+  FilePdf,
 } from '@phosphor-icons/react';
 import type {
   AIEnhancedPortfolioReport,
@@ -31,6 +32,8 @@ import type {
 } from '@/lib/portfolioApi';
 import { generateAIEnhancedPortfolioReport } from '@/lib/aiPortfolioReport';
 import { formatCurrency, formatPercent } from '@/lib/format';
+import { exportToPDF, generatePDFFilename } from '@/lib/pdfExport';
+import { toast } from 'sonner';
 
 interface AIPortfolioReportViewProps {
   walletAddress: string;
@@ -125,6 +128,20 @@ export function AIPortfolioReportView({
     }
   };
 
+  const handleExportPDF = () => {
+    try {
+      const filename = generatePDFFilename('ai_portfolio_report', walletAddress);
+      exportToPDF('ai-portfolio-report-content', filename);
+      toast.success('Report exported successfully', {
+        description: 'Opening print dialog...',
+      });
+    } catch (error) {
+      toast.error('Failed to export report', {
+        description: 'Please try again or contact support.',
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -212,9 +229,9 @@ export function AIPortfolioReportView({
                 </p>
               </div>
             </div>
-            <Button variant="outline">
-              <Download className="mr-2" size={18} />
-              Export Report
+            <Button onClick={handleExportPDF} className="no-print">
+              <FilePdf className="mr-2" size={18} weight="fill" />
+              Export PDF
             </Button>
           </div>
 
@@ -263,7 +280,8 @@ export function AIPortfolioReportView({
           </div>
         </div>
 
-        <Tabs defaultValue="summary" className="space-y-6">
+        <div id="ai-portfolio-report-content">
+          <Tabs defaultValue="summary" className="space-y-6">
           <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="summary">Executive Summary</TabsTrigger>
             <TabsTrigger value="risk">Risk Analysis</TabsTrigger>
@@ -911,7 +929,8 @@ export function AIPortfolioReportView({
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </div>
       </div>
     </div>
   );

@@ -16,10 +16,14 @@ import {
   Lightning,
   Target,
   Brain,
+  Download,
+  FilePdf,
 } from '@phosphor-icons/react';
 import { formatCurrency, formatPercent } from '@/lib/format';
 import { generateAIEnhancedPortfolioReport, type AIEnhancedPortfolioReport } from '@/lib/aiPortfolioReport';
 import { getPortfolioPositions, getPortfolioExposure, getPortfolioSummary } from '@/lib/portfolioApi';
+import { exportToPDF, generatePDFFilename } from '@/lib/pdfExport';
+import { toast } from 'sonner';
 
 type PortfolioSize = 'small' | 'medium' | 'large' | 'institutional';
 type RiskProfile = 'conservative' | 'moderate' | 'balanced' | 'aggressive';
@@ -284,6 +288,20 @@ function AIReportDisplay({
     concerning: 'text-orange-400 bg-orange-400/10 border-orange-400/30',
   };
 
+  const handleExportPDF = () => {
+    try {
+      const filename = generatePDFFilename('ai_portfolio_report', sizeLabel);
+      exportToPDF('ai-report-content', filename);
+      toast.success('Report exported successfully', {
+        description: 'Opening print dialog...',
+      });
+    } catch (error) {
+      toast.error('Failed to export report', {
+        description: 'Please try again or contact support.',
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="border-2 border-accent/20">
@@ -295,12 +313,18 @@ function AIReportDisplay({
                 Generated for {sizeLabel} · {riskLabel} Risk Profile · {new Date(report.generatedAt).toLocaleString()}
               </CardDescription>
             </div>
-            <Badge className={healthColors[insights.executiveSummary.portfolioHealth]}>
-              {insights.executiveSummary.portfolioHealth.toUpperCase()}
-            </Badge>
+            <div className="flex items-center gap-3">
+              <Badge className={healthColors[insights.executiveSummary.portfolioHealth]}>
+                {insights.executiveSummary.portfolioHealth.toUpperCase()}
+              </Badge>
+              <Button onClick={handleExportPDF} className="no-print">
+                <FilePdf className="mr-2" size={18} weight="fill" />
+                Export PDF
+              </Button>
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6" id="ai-report-content">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-muted/30 rounded-lg">
               <p className="text-xs text-muted-foreground mb-1">Total Value</p>

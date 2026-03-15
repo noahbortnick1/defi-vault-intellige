@@ -57,6 +57,25 @@
   }
 }
 
+@media print {
+  body {
+    background: white !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  nav {
+    display: none !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+}
+
 :root {
   --background: oklch(0.12 0.01 240);
   --foreground: oklch(0.95 0.01 240);
