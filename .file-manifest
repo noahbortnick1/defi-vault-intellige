@@ -7,6 +7,7 @@
 .gitignore
 .spark-initial-sha
 .spark-workbench-id
+AI_PORTFOLIO_GENERATOR.md
 AI_PORTFOLIO_REPORTS.md
 AI_REPORT_GENERATION.md
 API_IMPLEMENTATION.md
@@ -78,6 +79,7 @@ src/api/index.ts
 src/api/seedData.ts
 src/api/service.ts
 src/api/types.ts
+src/components/AIPortfolioGenerator.tsx
 src/components/AIPortfolioReportView.tsx
 src/components/ApiDemo.tsx
 src/components/ApiDocs.tsx
