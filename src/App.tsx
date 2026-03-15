@@ -31,9 +31,10 @@ import { VaultExplorer } from '@/components/VaultExplorer';
 import { VaultDetail } from '@/components/VaultDetail';
 import { YieldRadar } from '@/components/YieldRadar';
 import { PortfolioView } from '@/components/PortfolioView';
+import { PortfolioApiView } from '@/components/PortfolioApiView';
 import { DiscoveryEnginePanel } from '@/components/DiscoveryEnginePanel';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'discovery' | 'compare' | 'reports' | 'pricing' | 'docs' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'compare' | 'reports' | 'pricing' | 'docs' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -97,12 +98,12 @@ function App() {
               Radar
             </Button>
             <Button 
-              variant={currentPage === 'portfolio' ? 'secondary' : 'ghost'}
-              onClick={() => setCurrentPage('portfolio')}
+              variant={currentPage === 'portfolio' || currentPage === 'portfolio-api' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('portfolio-api')}
               size="sm"
             >
               <Briefcase className="mr-2" size={18} />
-              Portfolio
+              Portfolio API
             </Button>
             <Button 
               variant={currentPage === 'discovery' ? 'secondary' : 'ghost'}
@@ -671,6 +672,8 @@ function App() {
         return <YieldRadar onNavigateToVault={navigateToVault} renderNav={renderNav} />;
       case 'portfolio':
         return <PortfolioView portfolioId={selectedPortfolioId} onSelectPortfolio={setSelectedPortfolioId} renderNav={renderNav} />;
+      case 'portfolio-api':
+        return <PortfolioApiView renderNav={renderNav} />;
       case 'discovery':
         return renderDiscovery();
       case 'pricing':

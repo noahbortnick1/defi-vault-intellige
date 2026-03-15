@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 from app.api.vaults import router as vaults_router
+from app.api.portfolio import router as portfolio_router
 from app.models.vault import HealthResponse
 
 load_dotenv()
@@ -27,6 +28,7 @@ app.add_middleware(
 )
 
 app.include_router(vaults_router)
+app.include_router(portfolio_router)
 
 
 @app.get("/api/v1/health", response_model=HealthResponse, tags=["health"])
