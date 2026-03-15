@@ -43,8 +43,9 @@ import { AIPortfolioGenerator } from '@/components/AIPortfolioGenerator';
 import { ApiDemo } from '@/components/ApiDemo';
 import { PortfolioWithWallet } from '@/components/PortfolioWithWallet';
 import { RealDataDashboard } from '@/components/RealDataDashboard';
+import { StrategyMap } from '@/components/StrategyMap';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'strategy-map' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -142,6 +143,15 @@ function App() {
             >
               <Lightning className="mr-2" size={18} weight="fill" />
               AI Reports
+            </Button>
+            <Button 
+              variant={currentPage === 'strategy-map' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('strategy-map')}
+              size="sm"
+              className="bg-accent/10 hover:bg-accent/20 border border-accent/30"
+            >
+              <Cube className="mr-2" size={18} weight="fill" />
+              Strategy Map
             </Button>
             <Button 
               variant={currentPage === 'radar' ? 'secondary' : 'ghost'}
@@ -348,6 +358,19 @@ function App() {
 
           <Card className="border-2 border-accent/50 hover:border-accent transition-colors bg-gradient-to-br from-accent/5 to-background">
             <CardHeader>
+              <Cube className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Strategy Map</CardTitle>
+              <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Visual Intelligence</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Interactive graph visualization of DeFi vault relationships across assets, strategies, protocols, and chains. Discover patterns and connections that tables can't reveal.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-accent/50 hover:border-accent transition-colors bg-gradient-to-br from-accent/5 to-background">
+            <CardHeader>
               <FileText className="text-accent mb-3" size={40} weight="duotone" />
               <CardTitle className="text-xl">DD Reports</CardTitle>
               <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Diligence Layer</Badge>
@@ -358,7 +381,9 @@ function App() {
               </p>
             </CardContent>
           </Card>
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
             <CardHeader>
               <MagnifyingGlass className="text-accent mb-3" size={40} weight="duotone" />
@@ -924,6 +949,15 @@ function App() {
         return renderDiscovery();
       case 'wallet-tracker':
         return renderWalletTracker();
+      case 'strategy-map':
+        return (
+          <div className="min-h-screen bg-background">
+            {renderNav()}
+            <div className="container mx-auto px-6 py-12">
+              <StrategyMap onVaultClick={navigateToVault} />
+            </div>
+          </div>
+        );
       case 'pricing':
         return renderPricing();
       case 'docs':
