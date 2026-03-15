@@ -8,6 +8,7 @@
 .spark-initial-sha
 .spark-workbench-id
 API_IMPLEMENTATION.md
+API_INTEGRATION.md
 API_SCHEMA.md
 DISCOVERY_ENGINE.md
 DISCOVERY_ENGINE_ARCHITECTURE.md
@@ -91,6 +92,9 @@ src/components/VaultReportView.tsx
 src/components/WalletTracker.tsx
 src/components/YieldChart.tsx
 src/components/YieldRadar.tsx
+src/hooks/use-rankings-api.ts
+src/hooks/use-vault-api.ts
+src/hooks/use-vaults-api.ts
 src/index.css
 src/lib/discovery/aggregator.ts
 src/lib/discovery/engine.ts
