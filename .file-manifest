@@ -14,6 +14,7 @@ DISCOVERY_ENGINE_QUICK_START.md
 DISCOVERY_ENGINE_SUMMARY.md
 IMPLEMENTATION_SUMMARY.md
 MIGRATION.md
+PORTFOLIO_API.md
 PRD.md
 PROJECT_STRUCTURE.md
 README.md
@@ -28,11 +29,14 @@ backend/Dockerfile
 backend/README.md
 backend/app/__init__.py
 backend/app/api/__init__.py
+backend/app/api/portfolio.py
 backend/app/api/vaults.py
 backend/app/main.py
 backend/app/models/__init__.py
+backend/app/models/portfolio.py
 backend/app/models/vault.py
 backend/app/services/__init__.py
+backend/app/services/portfolio_service.py
 backend/app/services/risk.py
 backend/app/services/vault_service.py
 backend/requirements.txt
@@ -64,6 +68,7 @@ src/components/ApiDocs.tsx
 src/components/ArchitectureVisualization.tsx
 src/components/DiscoveryEnginePanel.tsx
 src/components/MetricCard.tsx
+src/components/PortfolioApiView.tsx
 src/components/PortfolioView.tsx
 src/components/RiskBadge.tsx
 src/components/VaultDetail.tsx
@@ -81,5 +86,6 @@ src/lib/discovery/types.ts
 src/lib/format.ts
 src/lib/formatters.ts
 src/lib/mockData.ts
+src/lib/portfolioApi.ts
 src/lib/risk.ts
 src/lib/types.ts
