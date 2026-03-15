@@ -39,8 +39,9 @@ import { WalletTracker } from '@/components/WalletTracker';
 import { RankingsPage } from '@/components/RankingsPage';
 import { VaultReportView } from '@/components/VaultReportView';
 import { PortfolioReportView } from '@/components/PortfolioReportView';
+import { ApiDemo } from '@/components/ApiDemo';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'pricing' | 'docs' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'pricing' | 'docs' | 'api-demo' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -137,6 +138,14 @@ function App() {
               <Book className="mr-2" size={18} />
               API Docs
             </Button>
+            <Button 
+              variant={currentPage === 'api-demo' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('api-demo')}
+              size="sm"
+            >
+              <Database className="mr-2" size={18} />
+              API Demo
+            </Button>
           </div>
         )}
         
@@ -187,6 +196,10 @@ function App() {
               <Button size="lg" variant="outline" onClick={() => setCurrentPage('vaults')}>
                 <Vault className="mr-2" size={20} />
                 Explore Vaults
+              </Button>
+              <Button size="lg" variant="ghost" onClick={() => setCurrentPage('api-demo')}>
+                <Database className="mr-2" size={20} />
+                Try API Demo
               </Button>
               <Button size="lg" variant="ghost" onClick={() => setCurrentPage('docs')}>
                 <Book className="mr-2" size={20} />
@@ -774,6 +787,15 @@ function App() {
         return renderPricing();
       case 'docs':
         return renderDocs();
+      case 'api-demo':
+        return (
+          <div className="min-h-screen bg-background">
+            {renderNav()}
+            <div className="container mx-auto px-6 py-12">
+              <ApiDemo />
+            </div>
+          </div>
+        );
       default:
         return renderLanding();
     }
