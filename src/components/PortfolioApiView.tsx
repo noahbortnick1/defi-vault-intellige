@@ -24,6 +24,7 @@ import {
   ChartBar,
   Coins,
   Network,
+  Sparkle,
 } from '@phosphor-icons/react';
 import {
   portfolioApi,
@@ -33,6 +34,7 @@ import {
   type SummaryApiResponse,
 } from '@/lib/portfolioApi';
 import { formatCurrency, formatPercent, getChainName } from '@/lib/format';
+import { AIPortfolioReportView } from './AIPortfolioReportView';
 
 interface PortfolioApiViewProps {
   renderNav: () => React.ReactNode;
@@ -46,6 +48,7 @@ export function PortfolioApiView({ renderNav }: PortfolioApiViewProps) {
   const [summary, setSummary] = useState<SummaryApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAIReport, setShowAIReport] = useState(false);
 
   const loadPortfolio = async (wallet: string) => {
     if (!wallet) return;
@@ -92,6 +95,19 @@ export function PortfolioApiView({ renderNav }: PortfolioApiViewProps) {
     if (score <= 6.0) return 'text-yellow-400';
     return 'text-red-400';
   };
+
+  if (showAIReport && positions && exposure && summary) {
+    return (
+      <AIPortfolioReportView
+        walletAddress={walletAddress}
+        positions={positions}
+        exposure={exposure}
+        summary={summary}
+        renderNav={renderNav}
+        onNavigateBack={() => setShowAIReport(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -158,9 +174,18 @@ export function PortfolioApiView({ renderNav }: PortfolioApiViewProps) {
             <>
               <Card className="border-2 border-accent/20 bg-gradient-to-br from-accent/5 to-background">
                 <CardHeader>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Briefcase size={24} className="text-accent" />
-                    <CardTitle className="text-2xl">Portfolio Overview</CardTitle>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Briefcase size={24} className="text-accent" />
+                      <CardTitle className="text-2xl">Portfolio Overview</CardTitle>
+                    </div>
+                    <Button
+                      onClick={() => setShowAIReport(true)}
+                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                    >
+                      <Sparkle className="mr-2" size={18} weight="duotone" />
+                      Generate AI Report
+                    </Button>
                   </div>
                   <p className="text-sm text-muted-foreground font-mono">
                     {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}

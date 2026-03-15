@@ -145,38 +145,98 @@ function mapPositionFromApi(data: PositionApiResponse): Position {
 
 export const portfolioApi = {
   async getPortfolio(walletAddress: string): Promise<Portfolio> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${walletAddress}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch portfolio: ${response.statusText}`);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${walletAddress}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch portfolio: ${response.statusText}`);
+      }
+      const data: PortfolioApiResponse = await response.json();
+      return mapPortfolioFromApi(data);
+    } catch (error) {
+      console.warn('API unavailable, using mock data');
+      const mockData = await getMockPortfolioData(walletAddress);
+      if (mockData.summary) {
+        return {
+          id: walletAddress,
+          name: 'Portfolio',
+          ownerType: 'dao',
+          walletAddress,
+          netWorth: mockData.summary.summary.total_value,
+          dailyChange: mockData.summary.summary.daily_change,
+          totalYield: mockData.summary.summary.total_yield_earned,
+          riskScore: mockData.summary.summary.avg_risk_score,
+          positions: [],
+        };
+      }
+      throw error;
     }
-    const data: PortfolioApiResponse = await response.json();
-    return mapPortfolioFromApi(data);
   },
 
   async getPositions(walletAddress: string): Promise<PositionsApiResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${walletAddress}/positions`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch positions: ${response.statusText}`);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${walletAddress}/positions`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch positions: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.warn('API unavailable, using mock data');
+      const mockData = await getMockPortfolioData(walletAddress);
+      if (mockData.positions) {
+        return mockData.positions;
+      }
+      throw error;
     }
-    return response.json();
   },
 
   async getExposure(walletAddress: string): Promise<ExposureApiResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${walletAddress}/exposure`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch exposure: ${response.statusText}`);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${walletAddress}/exposure`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch exposure: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.warn('API unavailable, using mock data');
+      const mockData = await getMockPortfolioData(walletAddress);
+      if (mockData.exposure) {
+        return mockData.exposure;
+      }
+      throw error;
     }
-    return response.json();
   },
 
   async getSummary(walletAddress: string): Promise<SummaryApiResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${walletAddress}/summary`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch summary: ${response.statusText}`);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${walletAddress}/summary`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch summary: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.warn('API unavailable, using mock data');
+      const mockData = await getMockPortfolioData(walletAddress);
+      if (mockData.summary) {
+        return mockData.summary;
+      }
+      throw error;
     }
-    return response.json();
   },
 };
+
+async function getMockPortfolioData(walletAddress: string) {
+  try {
+    const [positions, exposure, summary] = await Promise.all([
+      spark.kv.get<PositionsApiResponse>('demo-portfolio-positions'),
+      spark.kv.get<ExposureApiResponse>('demo-portfolio-exposure'),
+      spark.kv.get<SummaryApiResponse>('demo-portfolio-summary'),
+    ]);
+    return { positions, exposure, summary };
+  } catch (error) {
+    console.error('Failed to load mock data:', error);
+    return { positions: null, exposure: null, summary: null };
+  }
+}
 
 export const DEMO_WALLETS = [
   {

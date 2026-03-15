@@ -58,11 +58,11 @@ The platform is organized around five first-class modules that form a complete w
 - **Success criteria**: All key metrics visible without scrolling on desktop, expandable sections for deep dives, clear risk explanations, actionable compare/export options
 
 ### Portfolio / Treasury Page
-- **Functionality**: Multi-vault portfolio tracking with wallet address input, aggregate exposure analysis (by asset, protocol, strategy), allocation visualization, daily NAV tracking
-- **Purpose**: Monitor and analyze existing DeFi treasury positions with concentration risk visibility
+- **Functionality**: Multi-vault portfolio tracking with wallet address input, aggregate exposure analysis (by asset, protocol, strategy), allocation visualization, daily NAV tracking, AI-enhanced optimization recommendations
+- **Purpose**: Monitor and analyze existing DeFi treasury positions with concentration risk visibility and actionable rebalancing insights
 - **Trigger**: User navigates to Portfolio page and inputs wallet address or loads saved portfolio
-- **Progression**: Enter wallet address → Load positions → View aggregate exposure → Drill into asset/protocol/strategy breakdowns → Review allocations → Export snapshot
-- **Success criteria**: Support for multiple wallet addresses, accurate exposure calculations, exportable reports (PDF/CSV)
+- **Progression**: Enter wallet address → Load positions → View aggregate exposure → Drill into asset/protocol/strategy breakdowns → Generate AI-enhanced report with optimization recommendations → Review allocations → Export snapshot
+- **Success criteria**: Support for multiple wallet addresses, accurate exposure calculations, AI-generated insights in <5 seconds, actionable recommendations with specific vault suggestions, exportable reports (PDF/CSV)
 
 ### Due Diligence Report Page
 - **Functionality**: Formatted, printable single-vault report with executive summary, risk assessment, dependency analysis, audit status, yield source breakdown, red flags
@@ -84,6 +84,13 @@ The platform is organized around five first-class modules that form a complete w
 - **Trigger**: User navigates to Wallet Tracker from main nav and inputs wallet address
 - **Progression**: Enter wallet address → Select chain → Scan via RPC → Display native balance, token holdings, and vault positions → Refresh data → Track multiple wallets
 - **Success criteria**: Sub-10 second wallet scans, accurate balance retrieval via RPC, support for Ethereum/Arbitrum/Base/Optimism/Polygon/BSC, persistent wallet tracking list
+
+### AI-Enhanced Portfolio Reports
+- **Functionality**: Generate comprehensive AI-powered portfolio analysis reports with LLM-generated insights on risk concentration, diversification opportunities, specific vault recommendations for rebalancing, yield optimization strategies, and actionable next steps
+- **Purpose**: Transform raw portfolio data into strategic intelligence that guides allocation decisions with specific, contextual recommendations based on current positions and market opportunities
+- **Trigger**: User clicks "Generate AI Report" from portfolio view or selects enhanced report option
+- **Progression**: Load portfolio data → Generate AI analysis via LLM → Display comprehensive report with executive summary, risk analysis, optimization recommendations, specific vault suggestions → Export or share report
+- **Success criteria**: Report generation in <5 seconds, actionable recommendations with specific vault names and allocation percentages, risk-adjusted optimization suggestions, clear explanation of reasoning, professional formatting suitable for treasury committees
 
 ### Settings & Profile
 - **Functionality**: User preferences, alert configuration, API key management, workspace settings
