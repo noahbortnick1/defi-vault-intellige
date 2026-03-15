@@ -25,6 +25,8 @@ import {
   Cube,
   Trophy,
   FileText,
+  Target,
+  TreeStructure,
 } from '@phosphor-icons/react';
 import { VAULTS, RADAR_EVENTS, DEMO_PORTFOLIOS, PROTOCOLS } from '@/lib/mockData';
 import { formatCurrency, formatPercent, getRiskBgColor, getChainName, getStrategyLabel } from '@/lib/format';
@@ -43,8 +45,12 @@ import { AIPortfolioGenerator } from '@/components/AIPortfolioGenerator';
 import { ApiDemo } from '@/components/ApiDemo';
 import { PortfolioWithWallet } from '@/components/PortfolioWithWallet';
 import { RealDataDashboard } from '@/components/RealDataDashboard';
+import { ResearchLibrary } from '@/components/ResearchLibrary';
+import { AllocationEngine } from '@/components/AllocationEngine';
+import { StrategyIntelligence } from '@/components/StrategyIntelligence';
+import { DependencyGraph } from '@/components/DependencyGraph';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'settings' | 'research' | 'allocation' | 'strategy-intelligence' | 'dependency-graph';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -152,11 +158,44 @@ function App() {
               Radar
             </Button>
             <Button 
+              variant={currentPage === 'strategy-intelligence' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('strategy-intelligence')}
+              size="sm"
+            >
+              <ChartLine className="mr-2" size={18} />
+              Strategies
+            </Button>
+            <Button 
+              variant={currentPage === 'dependency-graph' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('dependency-graph')}
+              size="sm"
+            >
+              <TreeStructure className="mr-2" size={18} />
+              Dependencies
+            </Button>
+            <Button 
+              variant={currentPage === 'research' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('research')}
+              size="sm"
+            >
+              <Book className="mr-2" size={18} />
+              Research
+            </Button>
+            <Button 
+              variant={currentPage === 'allocation' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('allocation')}
+              size="sm"
+              className="bg-accent/10 hover:bg-accent/20 border border-accent/30"
+            >
+              <Target className="mr-2" size={18} weight="fill" />
+              Allocation
+            </Button>
+            <Button 
               variant={currentPage === 'docs' ? 'secondary' : 'ghost'}
               onClick={() => setCurrentPage('docs')}
               size="sm"
             >
-              <Book className="mr-2" size={18} />
+              <FileText className="mr-2" size={18} />
               API Docs
             </Button>
             <Button 
@@ -369,6 +408,88 @@ function App() {
               <p className="text-muted-foreground">
                 Three-layer discovery system finds 90-95% of vaults across aggregators, protocol registries, and onchain patterns. No manual curation required.
               </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+          <Card
+            className="border-2 border-primary/30 hover:border-primary/60 transition-colors bg-gradient-to-br from-primary/5 to-background cursor-pointer"
+            onClick={() => setCurrentPage('research')}
+          >
+            <CardHeader>
+              <Book className="text-primary mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Research Library</CardTitle>
+              <Badge className="w-fit bg-primary/10 text-primary border-primary/20 text-xs">Knowledge Base</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">
+                Centralized repository of whitepapers, audit reports, governance proposals, and strategy research. Every vault links to its relevant documentation.
+              </p>
+              <Button variant="outline" size="sm" className="border-primary/40 hover:bg-primary/10">
+                <Book className="mr-2" size={16} />
+                Browse Research
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card
+            className="border-2 border-accent/50 hover:border-accent transition-colors bg-gradient-to-br from-accent/5 to-background cursor-pointer"
+            onClick={() => setCurrentPage('allocation')}
+          >
+            <CardHeader>
+              <Target className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Allocation Engine</CardTitle>
+              <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Capital Routing</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">
+                Input asset, capital amount, risk tolerance, and liquidity requirements. Get an optimized vault allocation plan ready to deploy.
+              </p>
+              <Button variant="outline" size="sm" className="border-accent/40 hover:bg-accent/10">
+                <Target className="mr-2" size={16} weight="fill" />
+                Simulate Allocation
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card
+            className="border-2 border-border/50 hover:border-accent/30 transition-colors cursor-pointer"
+            onClick={() => setCurrentPage('strategy-intelligence')}
+          >
+            <CardHeader>
+              <ChartLine className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Strategy Intelligence</CardTitle>
+              <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Yield Attribution</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">
+                Automatic strategy classification with yield source decomposition. Understand where yield comes from across lending, LP, basis trade, and delta-neutral strategies.
+              </p>
+              <Button variant="outline" size="sm">
+                <ChartLine className="mr-2" size={16} />
+                View Strategies
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card
+            className="border-2 border-border/50 hover:border-orange-400/30 transition-colors cursor-pointer"
+            onClick={() => setCurrentPage('dependency-graph')}
+          >
+            <CardHeader>
+              <TreeStructure className="text-orange-400 mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Dependency Graph</CardTitle>
+              <Badge className="w-fit bg-orange-500/10 text-orange-400 border-orange-400/20 text-xs">Risk Cascade</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">
+                Visual protocol dependency trees showing how risk cascades through vault stacks. Identify systemic exposure across Aave, Curve, Chainlink, and bridge dependencies.
+              </p>
+              <Button variant="outline" size="sm" className="border-orange-400/40 hover:bg-orange-500/10">
+                <TreeStructure className="mr-2" size={16} />
+                Explore Dependencies
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -937,6 +1058,14 @@ function App() {
             </div>
           </div>
         );
+      case 'research':
+        return <ResearchLibrary renderNav={renderNav} />;
+      case 'allocation':
+        return <AllocationEngine renderNav={renderNav} />;
+      case 'strategy-intelligence':
+        return <StrategyIntelligence renderNav={renderNav} onNavigateToVault={navigateToVault} />;
+      case 'dependency-graph':
+        return <DependencyGraph renderNav={renderNav} onNavigateToVault={navigateToVault} />;
       default:
         return renderLanding();
     }

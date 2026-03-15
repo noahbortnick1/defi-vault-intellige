@@ -1,8 +1,452 @@
-# DeFi Vault Intelligence - Documentation
+# Yield Terminal Documentation
 
 ## Overview
 
-DeFi Vault Intelligence is a full-stack platform for analyzing yield vaults across DeFi protocols. It provides institutional-grade risk assessment, portfolio analytics, and a developer API.
+Yield Terminal is a DeFi yield intelligence platform that provides institutional-grade analytics, financial reporting, and risk analysis for yield strategies, vaults, and on-chain portfolios.
+
+The platform bridges traditional financial reporting with crypto-native strategy analytics, enabling allocators, DAOs, and researchers to evaluate yield strategies with greater transparency.
+
+Yield Terminal provides:
+
+- Vault discovery and analytics
+- Strategy classification
+- Risk scoring
+- GAAP-style financial reporting
+- Portfolio intelligence
+- Yield rankings
+- Research and documentation
+- Capital allocation engine
+- Developer APIs
+
+The platform aims to become a Bloomberg-style terminal for DeFi yield strategies.
+
+---
+
+## Platform Architecture
+
+Yield Terminal consists of several core subsystems.
+
+```
+Data Indexers
+    ↓
+Normalization Layer
+    ↓
+Vault Database
+    ↓
+Risk Engine
+    ↓
+Financial Reporting Engine
+    ↓
+API Layer
+    ↓
+Dashboard / Developer API
+```
+
+### Core Components
+
+| Component | Description |
+|-----------|-------------|
+| Indexer | Collects vault and yield data from on-chain sources |
+| Database | Stores normalized vault, portfolio, and historical data |
+| Risk Engine | Calculates risk scores for strategies |
+| Financial Engine | Generates financial statements and NAV |
+| Allocation Engine | Recommends vault allocations based on user constraints |
+| Research Library | Aggregates whitepapers, audits, and governance proposals |
+| API | Provides structured access to all platform data |
+| Frontend | Dashboard and reporting interface |
+
+---
+
+## Vault Intelligence
+
+The Vault Intelligence module indexes yield strategies across DeFi protocols.
+
+Each vault entry contains:
+
+- Protocol
+- Chain
+- Asset
+- Strategy type
+- TVL
+- APY
+- Risk score
+- Allocation score
+- Dependencies
+- Yield sources
+
+Example vault object:
+
+```json
+{
+  "name": "Morpho USDC Optimizer",
+  "protocol": "Morpho",
+  "chain": "Ethereum",
+  "asset": "USDC",
+  "strategy_type": "leveraged_lending",
+  "apy": 8.4,
+  "tvl": 21000000,
+  "risk_score": 3.1
+}
+```
+
+---
+
+## Strategy Classification
+
+Vaults are automatically categorized into strategy types.
+
+| Strategy | Description |
+|----------|-------------|
+| Lending | Depositing assets into lending markets |
+| LP | Liquidity provision in AMMs |
+| Leveraged Lending | Recursive borrowing strategies |
+| Delta Neutral | Market neutral funding strategies |
+| Yield Tokenization | PT/YT yield splitting |
+| Options | Options selling strategies |
+| Staking | Validator or restaking rewards |
+
+---
+
+## Risk Engine
+
+The platform calculates a risk score between 0 and 10 for every vault.
+
+### Risk Factors
+
+| Risk Factor | Description |
+|-------------|-------------|
+| Contract Risk | Upgradeability and admin privileges |
+| Dependency Risk | External protocol dependencies |
+| Oracle Risk | Dependence on price feeds |
+| Liquidity Risk | Exit liquidity depth |
+| Strategy Complexity | Operational complexity |
+| TVL Volatility | Stability of capital in the vault |
+
+### Risk Score Formula
+
+```
+RiskScore =
+  0.25 × ContractRisk
++ 0.20 × DependencyRisk
++ 0.10 × OracleRisk
++ 0.20 × LiquidityRisk
++ 0.15 × StrategyComplexity
++ 0.10 × TVLVolatility
+```
+
+### Risk Bands
+
+| Score | Category |
+|-------|----------|
+| 0–2 | Very Low Risk |
+| 2–4 | Low Risk |
+| 4–6 | Medium Risk |
+| 6–8 | High Risk |
+| 8–10 | Extreme Risk |
+
+---
+
+## Vault Rankings
+
+Vaults are ranked based on a composite allocation score.
+
+### Factors Used
+
+- Yield
+- Risk score
+- Liquidity
+- TVL growth
+- Audit coverage
+
+### Ranking Formula
+
+```
+AllocationScore =
+  0.35 × YieldScore
++ 0.25 × (10 - RiskScore)
++ 0.20 × LiquidityScore
++ 0.10 × TVLGrowth
++ 0.10 × AuditScore
+```
+
+### Ranking Modes
+
+- **Risk Adjusted** — Balanced weighting for conservative allocations
+- **Highest Yield** — APY-optimized for yield-seeking strategies
+- **Institutional** — Liquidity and audit-weighted for large allocations
+- **Liquidity Optimized** — Exit capacity prioritized
+
+---
+
+## Financial Reporting
+
+Yield Terminal provides institution-style financial statements for vaults.
+
+### Balance Sheet
+
+```
+Assets
+  Supplied assets
+  Idle balances
+  Accrued rewards
+
+Liabilities
+  Borrow positions
+  Fees payable
+
+Net Assets
+  Vault NAV
+```
+
+### Income Statement
+
+```
+Revenue
+  Lending income
+  Incentives
+  Trading fees
+
+Expenses
+  Borrow cost
+  Management fees
+  Execution cost
+
+Net Income
+```
+
+### Flow of Funds
+
+```
+Deposits
+Withdrawals
+Rewards claimed
+Rebalances
+Net capital flows
+```
+
+---
+
+## Portfolio Intelligence
+
+Yield Terminal can analyze any wallet or treasury.
+
+### Portfolio Reports Include
+
+**Asset Allocation**
+```
+USDC  59%
+ETH   25%
+WBTC  16%
+```
+
+**Strategy Allocation**
+```
+Lending        40%
+LP             30%
+Delta Neutral  20%
+Options        10%
+```
+
+**Protocol Exposure**
+- Morpho
+- Yearn
+- Aave
+- Pendle
+
+**Chain Exposure**
+- Ethereum
+- Arbitrum
+- Base
+
+---
+
+## Research Library
+
+The research module aggregates documentation and strategy analysis.
+
+### Supported Research Types
+
+- Protocol whitepapers
+- Audit reports
+- Strategy documentation
+- Governance proposals
+- Research notes
+
+Each vault links to relevant documentation.
+
+---
+
+## Allocation Engine
+
+The allocation engine recommends vault allocations based on user constraints.
+
+### Example Input
+
+```
+Asset:     USDC
+Capital:   $10M
+Max Risk:  4
+Liquidity: High
+```
+
+### Example Output
+
+```
+Allocation Plan
+
+Yearn USDC     → $4M   (40%)
+Morpho USDC    → $3M   (30%)
+Aave Lending   → $2M   (20%)
+Pendle PT      → $1M   (10%)
+```
+
+### Allocation Algorithm
+
+Vaults are scored by risk-adjusted yield weighted by liquidity score. Allocations are capped at 40% per vault to enforce diversification. Only active vaults matching the asset, risk, and liquidity constraints are eligible.
+
+---
+
+## API
+
+### Base Path
+
+```
+/api/v1
+```
+
+### Vaults
+
+```
+GET /vaults
+GET /vaults/:address
+GET /vaults/:address/risk
+GET /vaults/:address/financials
+```
+
+### Rankings
+
+```
+GET /rankings
+GET /rankings?mode=risk_adjusted
+GET /rankings?mode=highest_yield
+GET /rankings?mode=institutional
+GET /rankings?mode=best_liquidity
+```
+
+### Portfolio
+
+```
+GET /portfolio/:wallet
+GET /portfolio/:wallet/exposure
+GET /portfolio/:wallet/positions
+GET /portfolio/:wallet/financials
+```
+
+### Reports
+
+```
+GET /reports/vault/:address
+GET /reports/portfolio/:wallet
+```
+
+### Research
+
+```
+GET /research
+GET /research/vault/:address
+GET /research/protocol/:name
+```
+
+### Allocation
+
+```
+POST /allocation/simulate
+POST /allocation/execute
+```
+
+---
+
+## Data Sources
+
+Yield Terminal aggregates data from multiple sources.
+
+### Primary Sources
+
+1. **On-Chain Data** — Smart contract state, vault balances, token transfers, lending positions, liquidity pools
+2. **Protocol Registries** — Yearn, Beefy, Enzyme, Morpho, Pendle market registries
+3. **Public Data Feeds** — DeFiLlama public datasets, protocol subgraphs, governance proposals
+
+### Supported Chains
+
+- Ethereum
+- Arbitrum
+- Base
+- Optimism
+- Polygon
+
+---
+
+## Data and API Philosophy
+
+Yield Terminal is built on open blockchain data and publicly available protocol information. The platform does not rely on proprietary APIs from third-party analytics platforms.
+
+### Core Principles
+
+1. **Direct On-Chain Data** — Primary data is obtained directly from blockchain networks
+2. **Protocol-Level Integrations** — Native integration with protocol registries
+3. **Open Data Sources** — Public datasets validated against on-chain data
+4. **Independent Data Processing** — All analytics produced by internal pipelines
+
+All collected data is processed through Yield Terminal's internal analytics pipeline, performing:
+
+- Strategy classification
+- Yield attribution
+- Risk modeling
+- Liquidity analysis
+- Financial statement generation
+
+---
+
+## Technology Stack
+
+### Frontend
+
+- React 19
+- TypeScript
+- Vite
+- TailwindCSS
+- shadcn/ui + Radix UI
+- Recharts
+- React Query
+
+### Backend
+
+- FastAPI
+- Pydantic
+- Python 3.11+
+
+### Indexer
+
+- Python 3.11+
+- Web3.py / ethers
+
+---
+
+## Long-Term Vision
+
+Yield Terminal aims to become the intelligence layer for DeFi yield strategies.
+
+By combining:
+
+- Strategy analytics
+- Financial reporting
+- Risk modeling
+- Portfolio monitoring
+- Capital allocation
+- Research library
+
+the platform provides a unified environment for analyzing and deploying capital across DeFi — a Bloomberg Terminal for on-chain yield.
+
 
 ## Architecture
 
