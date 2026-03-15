@@ -6,13 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiClient } from '@/api';
+import { ApiReportViewer } from '@/components/ApiReportViewer';
 import type { Vault, RankingEntry, VaultRiskReport, Portfolio, VaultReport, RankingMode } from '@/api/types';
-import { Database, ChartBar, ShieldCheck, Briefcase, FileText, Zap } from '@phosphor-icons/react';
+import { Database, ChartBar, ShieldCheck, Briefcase, FileText, Zap, Sparkle } from '@phosphor-icons/react';
 
 export function ApiDemo() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showReportViewer, setShowReportViewer] = useState(false);
 
   const [vaultAddress, setVaultAddress] = useState('0x123abc');
   const [walletAddress, setWalletAddress] = useState('0xabc...');
@@ -36,22 +38,38 @@ export function ApiDemo() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">API Demo Console</h2>
-        <p className="text-muted-foreground">
-          Test the Yield Terminal API endpoints with live data
-        </p>
-      </div>
+      {showReportViewer ? (
+        <div>
+          <Button 
+            variant="ghost" 
+            onClick={() => setShowReportViewer(false)}
+            className="mb-4"
+          >
+            ← Back to API Demo
+          </Button>
+          <ApiReportViewer 
+            vaultAddress={vaultAddress}
+            onClose={() => setShowReportViewer(false)}
+          />
+        </div>
+      ) : (
+        <>
+          <div>
+            <h2 className="text-3xl font-bold mb-2">API Demo Console</h2>
+            <p className="text-muted-foreground">
+              Test the Yield Terminal API endpoints with live data and AI-enhanced reports
+            </p>
+          </div>
 
-      <Tabs defaultValue="health" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="health">Health</TabsTrigger>
-          <TabsTrigger value="vaults">Vaults</TabsTrigger>
-          <TabsTrigger value="vault">Vault Detail</TabsTrigger>
-          <TabsTrigger value="rankings">Rankings</TabsTrigger>
-          <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-          <TabsTrigger value="report">Reports</TabsTrigger>
-        </TabsList>
+          <Tabs defaultValue="health" className="w-full">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="health">Health</TabsTrigger>
+              <TabsTrigger value="vaults">Vaults</TabsTrigger>
+              <TabsTrigger value="vault">Vault Detail</TabsTrigger>
+              <TabsTrigger value="rankings">Rankings</TabsTrigger>
+              <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+              <TabsTrigger value="report">Reports</TabsTrigger>
+            </TabsList>
 
         <TabsContent value="health" className="space-y-4">
           <Card>
@@ -234,13 +252,13 @@ export function ApiDemo() {
         </TabsContent>
 
         <TabsContent value="report" className="space-y-4">
-          <Card>
+          <Card className="border-accent/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="text-accent" size={24} />
-                GET /api/v1/reports/vault/:address
+                <Sparkle className="text-accent" size={24} weight="fill" />
+                AI-Enhanced Vault Reports
               </CardTitle>
-              <CardDescription>Generate comprehensive DD report</CardDescription>
+              <CardDescription>Generate comprehensive DD reports with AI insights</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -258,14 +276,15 @@ export function ApiDemo() {
                 </Select>
               </div>
               <Button 
-                onClick={() => executeApiCall(
-                  () => apiClient.getVaultReport(vaultAddress), 
-                  'Vault DD Report'
-                )}
-                disabled={loading}
+                onClick={() => setShowReportViewer(true)}
+                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
               >
-                Generate Report
+                <Sparkle className="mr-2" size={18} weight="fill" />
+                Generate AI-Enhanced Report
               </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Reports include AI-generated insights, risk assessment, and recommendations
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -337,6 +356,8 @@ export function ApiDemo() {
             )}
           </CardContent>
         </Card>
+      )}
+        </>
       )}
     </div>
   );

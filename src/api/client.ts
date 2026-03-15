@@ -38,8 +38,8 @@ export class ApiClient {
     return apiService.getPortfolio(walletAddress);
   }
 
-  async getVaultReport(address: string): Promise<VaultReport | null> {
-    return apiService.getVaultReport(address);
+  async getVaultReport(address: string, useAI: boolean = true): Promise<VaultReport | null> {
+    return apiService.getVaultReport(address, useAI);
   }
 }
 

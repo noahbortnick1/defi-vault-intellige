@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,9 +17,10 @@ import {
   Lock,
   Drop,
   Vault,
+  Sparkle,
 } from '@phosphor-icons/react';
 import { VAULTS } from '@/lib/mockData';
-import { generateVaultDDReport } from '@/lib/reports';
+import { generateVaultDDReportWithAI } from '@/lib/reportApi';
 import { formatCurrency, formatPercent, getRiskBgColor } from '@/lib/format';
 import type { VaultDDReport } from '@/lib/types';
 
@@ -30,20 +31,69 @@ interface VaultReportViewProps {
 }
 
 export function VaultReportView({ vaultId, renderNav, onNavigateBack }: VaultReportViewProps) {
-  const report: VaultDDReport | null = useMemo(() => {
-    const vault = VAULTS.find(v => v.id === vaultId);
-    if (!vault) return null;
-    return generateVaultDDReport(vault);
+  const [report, setReport] = useState<VaultDDReport | null>(null);
+  const [isGenerating, setIsGenerating] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function generateReport() {
+      const vault = VAULTS.find(v => v.id === vaultId);
+      if (!vault) {
+        setError('Vault not found');
+        setIsGenerating(false);
+        return;
+      }
+
+      try {
+        setIsGenerating(true);
+        const generatedReport = await generateVaultDDReportWithAI(vault);
+        setReport(generatedReport);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to generate report:', err);
+        setError('Failed to generate report. Please try again.');
+      } finally {
+        setIsGenerating(false);
+      }
+    }
+
+    generateReport();
   }, [vaultId]);
 
-  if (!report) {
+  if (isGenerating) {
+    return (
+      <div className="min-h-screen bg-background">
+        {renderNav()}
+        <div className="container mx-auto px-6 py-12">
+          <Card>
+            <CardContent className="py-12">
+              <div className="flex flex-col items-center gap-4">
+                <Sparkle size={48} className="text-accent animate-pulse" weight="duotone" />
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-2">Generating AI-Enhanced Due Diligence Report</h3>
+                  <p className="text-muted-foreground">Analyzing vault strategy, risk factors, and generating insights...</p>
+                </div>
+                <Progress value={66} className="w-64" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !report) {
     return (
       <div className="min-h-screen bg-background">
         {renderNav()}
         <div className="container mx-auto px-6 py-12">
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">Report not found</p>
+              <Warning size={48} className="text-destructive mx-auto mb-4" weight="duotone" />
+              <p className="text-muted-foreground">{error || 'Report not found'}</p>
+              <Button onClick={onNavigateBack} className="mt-4">
+                Go Back
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -86,7 +136,13 @@ export function VaultReportView({ vaultId, renderNav, onNavigateBack }: VaultRep
               <FileText className="text-accent" size={28} weight="duotone" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold">Vault Due Diligence Report</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-4xl font-bold">Vault Due Diligence Report</h1>
+                <Badge className="bg-accent/10 text-accent border-accent/20">
+                  <Sparkle size={14} className="mr-1" weight="fill" />
+                  AI-Enhanced
+                </Badge>
+              </div>
               <p className="text-muted-foreground">
                 Generated {new Date(report.generatedAt).toLocaleDateString()}
               </p>

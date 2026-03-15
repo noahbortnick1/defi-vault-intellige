@@ -171,7 +171,7 @@ export class ApiService {
     return buildPortfolio(walletAddress);
   }
 
-  async getVaultReport(address: string): Promise<VaultReport | null> {
+  async getVaultReport(address: string, useAI: boolean = true): Promise<VaultReport | null> {
     const vault = await this.getVaultByAddress(address);
     if (!vault) return null;
 
@@ -195,6 +195,15 @@ export class ApiService {
       redFlags.push('Depends on external oracle');
     }
 
+    if (useAI) {
+      try {
+        const aiEnhancedReport = await this.generateAIEnhancedReport(vault, risk, redFlags);
+        return aiEnhancedReport;
+      } catch (error) {
+        console.error('AI report generation failed, falling back to standard report:', error);
+      }
+    }
+
     return {
       vault,
       strategy_summary: vault.strategy || 'No strategy description available',
@@ -216,6 +225,86 @@ export class ApiService {
       overall_risk_score: vault.risk_score,
       red_flags: redFlags,
     };
+  }
+
+  private async generateAIEnhancedReport(
+    vault: Vault, 
+    risk: VaultRiskReport, 
+    redFlags: string[]
+  ): Promise<VaultReport> {
+    const vaultContext = JSON.stringify({
+      name: vault.name,
+      protocol: vault.protocol,
+      chain: vault.chain,
+      strategy: vault.strategy,
+      asset: vault.asset,
+      apy: vault.apy,
+      tvl: vault.tvl,
+      riskScore: vault.risk_score,
+      riskBand: vault.risk_band,
+      liquidityDepth: vault.liquidity_depth,
+      upgradeability: vault.upgradeability,
+      yieldSources: vault.yield_sources,
+      dependencies: vault.dependencies,
+      riskFactors: risk.factors,
+    }, null, 2);
+
+    const prompt = spark.llmPrompt`You are a DeFi risk analyst creating a comprehensive due diligence report.
+
+Analyze this vault:
+${vaultContext}
+
+Generate a detailed analysis with:
+
+1. **Strategy Summary** (2-3 sentences): Explain how the vault generates yield in clear terms for institutional investors.
+
+2. **Key Insights** (4-5 bullet points): Critical takeaways about risk, yield sustainability, and suitability.
+
+3. **Risk Assessment** (2-3 sentences): Evaluate overall risk profile considering smart contract security, liquidity, dependencies, and market risks.
+
+4. **Recommendations** (2-3 sentences): Specific guidance on position sizing, entry/exit strategy, and ongoing monitoring.
+
+Return as JSON:
+{
+  "strategy_summary": "string",
+  "key_insights": ["array of 4-5 strings"],
+  "risk_assessment": "string",
+  "recommendations": "string"
+}`;
+
+    try {
+      const result = await spark.llm(prompt, 'gpt-4o-mini', true);
+      const aiAnalysis = JSON.parse(result);
+
+      return {
+        vault,
+        strategy_summary: aiAnalysis.strategy_summary || vault.strategy || 'No strategy description available',
+        yield_sources: vault.yield_sources || [],
+        dependencies: vault.dependencies || [],
+        contract_risk: {
+          upgradeability: vault.upgradeability || 'immutable',
+          timelock: vault.upgradeability === 'timelock_upgradeable' ? '24h' : undefined,
+          audits: vault.protocol === 'Yearn' ? ['Trail of Bits', 'OpenZeppelin'] :
+                  vault.protocol === 'Aave' ? ['Trail of Bits', 'OpenZeppelin', 'Consensys Diligence'] :
+                  vault.protocol === 'Compound' ? ['OpenZeppelin', 'Trail of Bits'] :
+                  ['Trail of Bits'],
+        },
+        liquidity_profile: {
+          depth: vault.liquidity_depth || 'medium',
+          withdrawal_risk: vault.liquidity_depth === 'high' ? 'low' :
+                          vault.liquidity_depth === 'medium' ? 'moderate' : 'high',
+        },
+        overall_risk_score: vault.risk_score,
+        red_flags: redFlags,
+        ai_insights: {
+          key_insights: aiAnalysis.key_insights || [],
+          risk_assessment: aiAnalysis.risk_assessment || '',
+          recommendations: aiAnalysis.recommendations || '',
+        },
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
 

@@ -128,6 +128,11 @@ export interface VaultReport {
   liquidity_profile: LiquidityProfile;
   overall_risk_score: number;
   red_flags: string[];
+  ai_insights?: {
+    key_insights: string[];
+    risk_assessment: string;
+    recommendations: string;
+  };
 }
 
 export interface PortfolioReport {
