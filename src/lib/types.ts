@@ -212,3 +212,134 @@ export interface DiscoveredVault {
   apy: number;
   status: 'pending' | 'verified' | 'rejected';
 }
+
+export type RankingMode = 'risk-adjusted' | 'highest-yield' | 'institutional-fit' | 'best-liquidity';
+
+export interface RankingScore {
+  vaultId: string;
+  overallScore: number;
+  netApyScore: number;
+  riskScore: number;
+  liquidityScore: number;
+  auditScore: number;
+  dependencyScore: number;
+  incentiveScore: number;
+  rank: number;
+  reasoning: string;
+}
+
+export interface RankedVault extends Vault {
+  ranking: RankingScore;
+}
+
+export interface VaultDDReport {
+  id: string;
+  vaultId: string;
+  vault: Vault;
+  generatedAt: string;
+  summary: {
+    recommendation: 'strong-buy' | 'buy' | 'hold' | 'avoid';
+    keyTakeaways: string[];
+    overallScore: number;
+  };
+  strategy: {
+    description: string;
+    complexity: 'low' | 'medium' | 'high';
+    mechanism: string;
+  };
+  yieldSources: {
+    sources: Array<{
+      name: string;
+      percentage: number;
+      sustainability: 'high' | 'medium' | 'low';
+      description: string;
+    }>;
+    analysis: string;
+  };
+  dependencies: {
+    list: Dependency[];
+    complexity: number;
+    criticalDependencies: string[];
+    analysis: string;
+  };
+  contractRisk: {
+    isUpgradeable: boolean;
+    adminControls: string[];
+    timelockDuration?: string;
+    audits: AuditInfo[];
+    score: number;
+    analysis: string;
+  };
+  liquidityProfile: {
+    liquidityDepth: string;
+    exitCapacity: string;
+    concentrationRisk: string;
+    score: number;
+  };
+  redFlags: string[];
+  overallRisk: {
+    score: number;
+    band: RiskBand;
+    breakdown: RiskFactor[];
+  };
+}
+
+export interface PortfolioDDReport {
+  id: string;
+  portfolioId: string;
+  portfolio: Portfolio;
+  generatedAt: string;
+  summary: {
+    totalValue: number;
+    positionCount: number;
+    overallRisk: number;
+    diversificationScore: number;
+    keyFindings: string[];
+  };
+  positions: {
+    list: Position[];
+    largest: Position[];
+  };
+  exposure: {
+    byAsset: Record<string, { value: number; percentage: number; count: number }>;
+    byProtocol: Record<string, { value: number; percentage: number; count: number }>;
+    byChain: Record<string, { value: number; percentage: number; count: number }>;
+    byStrategy: Record<string, { value: number; percentage: number; count: number }>;
+  };
+  concentrationRisk: {
+    herfindahlIndex: number;
+    topThreeConcentration: number;
+    analysis: string;
+    recommendations: string[];
+  };
+  yieldAnalysis: {
+    totalYield: number;
+    avgYield: number;
+    yieldBySource: Record<string, number>;
+  };
+}
+
+export interface AllocationReport {
+  id: string;
+  generatedAt: string;
+  targetAsset: string;
+  targetRiskBand: RiskBand;
+  totalAmount: number;
+  recommendations: Array<{
+    vault: Vault;
+    allocation: number;
+    percentage: number;
+    rationale: string;
+  }>;
+  rationale: {
+    methodology: string;
+    constraints: string[];
+    considerations: string[];
+  };
+  downsideConsiderations: string[];
+  liquidityLimits: {
+    maxSingleVaultSize: number;
+    maxProtocolExposure: number;
+    reasoning: string;
+  };
+}

@@ -1,30 +1,47 @@
 # DeFi Vault Intelligence Platform
 
-An institutional-grade due diligence and treasury analytics platform for DeFi yield vaults, built for funds, treasuries, and developers who need explainable risk metrics and data-driven allocation insights.
+An institutional-grade due diligence and treasury analytics platform for DeFi yield vaults, built for funds, treasuries, and developers who need intelligent rankings, comprehensive DD reports, and data-driven allocation insights.
 
 **Experience Qualities**:
 1. **Professional** - Bloomberg-level data density and clarity with institutional typography and color choices that convey authority and precision
-2. **Transparent** - Every metric, score, and recommendation shows its calculation methodology and underlying data sources with full audit trails
-3. **Efficient** - Information-dense layouts with keyboard shortcuts, saved views, and workflows optimized for professional analysts doing deep due diligence
+2. **Decisive** - Rankings and reports that support fast, confident allocation decisions with transparent methodology and clear recommendations
+3. **Comprehensive** - Full due diligence from discovery to allocation with multi-dimensional scoring, dependency analysis, and risk decomposition
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This is a multi-page institutional analytics platform with extensive data visualization, filtering, comparison tools, portfolio tracking, risk decomposition, report generation, and API integration. It requires sophisticated state management, routing, data modeling, and export capabilities comparable to professional financial software.
+This is a multi-page institutional analytics platform with intelligent ranking algorithms, automated report generation, portfolio tracking, risk decomposition, and API integration. It requires sophisticated state management, routing, data modeling, and scoring systems comparable to professional financial software.
+
+## Core Product Modules
+
+The platform is organized around five first-class modules that form a complete workflow from discovery to allocation:
+
+1. **Vault Rankings** - Decision layer for rapid vault selection using multi-dimensional scoring
+2. **DD Reports** - Comprehensive due diligence reports with strategy, risk, and dependency analysis
+3. **Vault Explorer** - Discovery and filtering of yield opportunities across protocols and chains
+4. **Portfolio / Treasury** - Position tracking with exposure analysis and concentration risk assessment
+5. **Developer API** - RESTful API for rankings, vault data, and report generation
 
 ## Essential Features
 
-### Landing Page
-- **Functionality**: Marketing site with hero, feature highlights, pricing tiers, API documentation links, and CTA for institutional sign-up
-- **Purpose**: Convert institutional clients by establishing credibility and demonstrating platform depth
-- **Trigger**: User visits root URL
-- **Progression**: Hero with value prop → Feature grid highlighting risk framework → Pricing comparison → API capabilities → CTA to sign up or explore demo
-- **Success criteria**: Clear navigation to both marketing content and app, professional appearance that builds trust
+### Vault Rankings (Decision Layer)
+- **Functionality**: Multi-dimensional vault ranking system with composite scoring based on APY, risk, liquidity, audit quality, dependency complexity, and incentive dependence
+- **Purpose**: Enable rapid discovery and selection of optimal vault allocations under specific constraints - the "show me best USDC deployments under my risk constraints" use case
+- **Trigger**: User navigates to Rankings from main nav or landing page
+- **Progression**: Select ranking mode (risk-adjusted, highest yield, institutional fit, best liquidity) → Apply filters (asset, chain, protocol, risk band) → Review ranked results with scoring rationale → Navigate to vault detail or generate DD report
+- **Success criteria**: Sub-second ranking recalculation, clear score explanations, filtering that preserves ranking order, one-click report generation
+
+### DD Reports (Diligence Layer)
+- **Functionality**: Automated generation of comprehensive due diligence reports including vault DD (strategy, yield sources, dependencies, contract risk, liquidity profile), portfolio reports (exposure analysis, concentration risk), and allocation reports (optimized recommendations)
+- **Purpose**: Provide all analysis needed for allocation decisions in a structured, exportable format - from initial screening to final recommendation
+- **Trigger**: User clicks "Generate Report" from rankings, vault detail, or portfolio pages
+- **Progression**: Select report type → View generated report with all sections → Export as PDF or share link → Navigate to related vaults or portfolios
+- **Success criteria**: Reports generated in <2 seconds, all key risk factors included with explanations, professional formatting suitable for board presentations, clear recommendations
 
 ### Vault Explorer
 - **Functionality**: Filterable, sortable table of DeFi vaults with multi-dimensional filtering (chain, asset, protocol, strategy type, risk band, TVL, APY ranges)
 - **Purpose**: Enable rapid discovery and initial screening of yield opportunities across the DeFi ecosystem
 - **Trigger**: User navigates to Vaults page from main nav
-- **Progression**: Load vault table → Apply filters (chain, protocol, risk, TVL, APY) → Sort by metric → Save view/add to watchlist → Click vault for details
-- **Success criteria**: Sub-second filtering, ability to save custom views, watchlist persistence, smooth navigation to detail pages
+- **Progression**: Load vault table → Apply filters (chain, protocol, risk, TVL, APY) → Sort by metric → Save view/add to watchlist → Click vault for details or rankings
+- **Success criteria**: Sub-second filtering, ability to save custom views, watchlist persistence, smooth navigation to rankings and detail pages
 
 ### Vault Discovery Engine
 - **Functionality**: Automatic vault discovery system with three layers (aggregators, protocol registries, onchain detection), strategy classification, and yield decomposition

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { 
+import {
   ChartBar,
   Vault,
   Lightning,
@@ -23,6 +23,8 @@ import {
   ArrowRight,
   Database,
   Cube,
+  Trophy,
+  FileText,
 } from '@phosphor-icons/react';
 import { VAULTS, RADAR_EVENTS, DEMO_PORTFOLIOS, PROTOCOLS } from '@/lib/mockData';
 import { formatCurrency, formatPercent, getRiskBgColor, getChainName, getStrategyLabel } from '@/lib/format';
@@ -34,8 +36,11 @@ import { PortfolioView } from '@/components/PortfolioView';
 import { PortfolioApiView } from '@/components/PortfolioApiView';
 import { DiscoveryEnginePanel } from '@/components/DiscoveryEnginePanel';
 import { WalletTracker } from '@/components/WalletTracker';
+import { RankingsPage } from '@/components/RankingsPage';
+import { VaultReportView } from '@/components/VaultReportView';
+import { PortfolioReportView } from '@/components/PortfolioReportView';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'wallet-tracker' | 'compare' | 'reports' | 'pricing' | 'docs' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'pricing' | 'docs' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -53,6 +58,16 @@ function App() {
   const navigateBack = () => {
     setSelectedVaultId(null);
     setCurrentPage('vaults');
+  };
+
+  const navigateToVaultReport = (vaultId: string) => {
+    setSelectedVaultId(vaultId);
+    setCurrentPage('vault-report');
+  };
+
+  const navigateToPortfolioReport = (portfolioId: string) => {
+    setSelectedPortfolioId(portfolioId);
+    setCurrentPage('portfolio-report');
   };
 
   const toggleWatchlist = (vaultId: string) => {
@@ -91,6 +106,22 @@ function App() {
               Vaults
             </Button>
             <Button 
+              variant={currentPage === 'rankings' || currentPage === 'vault-report' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('rankings')}
+              size="sm"
+            >
+              <ChartBar className="mr-2" size={18} />
+              Rankings
+            </Button>
+            <Button 
+              variant={currentPage === 'portfolio' || currentPage === 'portfolio-api' || currentPage === 'portfolio-report' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('portfolio-api')}
+              size="sm"
+            >
+              <Briefcase className="mr-2" size={18} />
+              Portfolio
+            </Button>
+            <Button 
               variant={currentPage === 'radar' ? 'secondary' : 'ghost'}
               onClick={() => setCurrentPage('radar')}
               size="sm"
@@ -99,44 +130,12 @@ function App() {
               Radar
             </Button>
             <Button 
-              variant={currentPage === 'portfolio' || currentPage === 'portfolio-api' ? 'secondary' : 'ghost'}
-              onClick={() => setCurrentPage('portfolio-api')}
-              size="sm"
-            >
-              <Briefcase className="mr-2" size={18} />
-              Portfolio API
-            </Button>
-            <Button 
-              variant={currentPage === 'discovery' ? 'secondary' : 'ghost'}
-              onClick={() => setCurrentPage('discovery')}
-              size="sm"
-            >
-              <MagnifyingGlass className="mr-2" size={18} />
-              Discovery
-            </Button>
-            <Button 
-              variant={currentPage === 'wallet-tracker' ? 'secondary' : 'ghost'}
-              onClick={() => setCurrentPage('wallet-tracker')}
-              size="sm"
-            >
-              <Vault className="mr-2" size={18} />
-              Wallet Tracker
-            </Button>
-            <Button 
-              variant={currentPage === 'pricing' ? 'secondary' : 'ghost'}
-              onClick={() => setCurrentPage('pricing')}
-              size="sm"
-            >
-              <CurrencyDollar className="mr-2" size={18} />
-              Pricing
-            </Button>
-            <Button 
               variant={currentPage === 'docs' ? 'secondary' : 'ghost'}
               onClick={() => setCurrentPage('docs')}
               size="sm"
             >
               <Book className="mr-2" size={18} />
-              Docs
+              API Docs
             </Button>
           </div>
         )}
@@ -170,28 +169,28 @@ function App() {
             </Badge>
             
             <h2 className="text-5xl font-bold tracking-tight leading-tight">
-              Know where DeFi yield comes from
+              Institutional DeFi Intelligence
               <br />
-              <span className="text-accent">before you allocate</span>
+              <span className="text-accent">for confident capital allocation</span>
             </h2>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Due diligence, risk assessment, and portfolio analytics for institutional DeFi treasury management.
-              Explainable risk scoring and comprehensive vault intelligence for confident capital allocation.
+              Rankings, due diligence reports, and portfolio analytics for treasury management.
+              Make data-driven allocation decisions with transparent risk scoring.
             </p>
 
             <div className="flex items-center justify-center gap-4 pt-4">
-              <Button size="lg" onClick={() => setCurrentPage('vaults')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button size="lg" onClick={() => setCurrentPage('rankings')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <ChartBar className="mr-2" size={20} />
+                View Rankings
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => setCurrentPage('vaults')}>
                 <Vault className="mr-2" size={20} />
                 Explore Vaults
               </Button>
-              <Button size="lg" variant="outline" onClick={() => setCurrentPage('portfolio')}>
-                <Briefcase className="mr-2" size={20} />
-                View Demo Portfolio
-              </Button>
               <Button size="lg" variant="ghost" onClick={() => setCurrentPage('docs')}>
                 <Book className="mr-2" size={20} />
-                Documentation
+                API Docs
               </Button>
             </div>
           </div>
@@ -202,37 +201,39 @@ function App() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <Card className="border-2 border-accent/50 hover:border-accent transition-colors bg-gradient-to-br from-accent/5 to-background">
             <CardHeader>
+              <Trophy className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Intelligent Rankings</CardTitle>
+              <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Decision Layer</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Multi-dimensional vault ranking by risk-adjusted yield, institutional fit, liquidity depth, and audit quality. Find the best USDC deployments under your risk constraints instantly.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-accent/50 hover:border-accent transition-colors bg-gradient-to-br from-accent/5 to-background">
+            <CardHeader>
+              <FileText className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">DD Reports</CardTitle>
+              <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Diligence Layer</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Comprehensive due diligence reports with strategy analysis, yield decomposition, dependency mapping, contract risk assessment, and liquidity profiling. From discovery to allocation decision.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
+            <CardHeader>
               <MagnifyingGlass className="text-accent mb-3" size={40} weight="duotone" />
-              <CardTitle className="text-xl">Automated Vault Discovery</CardTitle>
+              <CardTitle className="text-xl">Automated Discovery</CardTitle>
               <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Technical Moat</Badge>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Three-layer discovery system automatically finds 90-95% of vaults across aggregators, protocol registries, and onchain patterns. No manual curation.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
-            <CardHeader>
-              <ShieldCheck className="text-accent mb-3" size={40} weight="duotone" />
-              <CardTitle className="text-xl">Explainable Risk Scoring</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Every risk score breaks down into smart contract, liquidity, market, and governance factors with transparent explanations. No black boxes.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-border/50 hover:border-accent/30 transition-colors">
-            <CardHeader>
-              <ChartLine className="text-accent mb-3" size={40} weight="duotone" />
-              <CardTitle className="text-xl">Yield Decomposition</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Understand yield sources: base yield vs. incentives, trading fees vs. borrow interest. Assess sustainability and real returns.
+                Three-layer discovery system finds 90-95% of vaults across aggregators, protocol registries, and onchain patterns. No manual curation required.
               </p>
             </CardContent>
           </Card>
@@ -345,15 +346,15 @@ function App() {
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <h3 className="text-3xl font-bold">Ready to get started?</h3>
           <p className="text-lg text-muted-foreground">
-            Explore vaults, analyze portfolios, and make confident allocation decisions with institutional-grade intelligence.
+            Rank vaults, generate DD reports, and make confident allocation decisions with institutional-grade intelligence.
           </p>
           <div className="flex items-center justify-center gap-4 pt-4">
-            <Button size="lg" onClick={() => setCurrentPage('vaults')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              Explore Vaults
+            <Button size="lg" onClick={() => setCurrentPage('rankings')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+              View Rankings
               <ArrowRight className="ml-2" size={20} />
             </Button>
-            <Button size="lg" variant="outline" onClick={() => setCurrentPage('pricing')}>
-              View Pricing
+            <Button size="lg" variant="outline" onClick={() => setCurrentPage('docs')}>
+              API Documentation
             </Button>
           </div>
         </div>
@@ -559,29 +560,140 @@ function App() {
       
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold mb-8">Documentation</h2>
+          <h2 className="text-4xl font-bold mb-8">API Documentation</h2>
           
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Getting Started</CardTitle>
-                <CardDescription>Learn how to use Yield Terminal effectively</CardDescription>
+                <CardTitle>Core API Endpoints</CardTitle>
+                <CardDescription>RESTful API for rankings, vault data, and reports</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-semibold mb-2">Overview</h4>
-                  <p className="text-muted-foreground">
-                    Yield Terminal provides institutional-grade DeFi yield intelligence. Browse vaults, analyze risk,
-                    monitor portfolios, and make data-driven allocation decisions.
+                  <h4 className="font-semibold mb-3 text-accent">Rankings</h4>
+                  <div className="space-y-2 font-mono text-sm bg-muted/30 p-4 rounded-lg">
+                    <p className="text-muted-foreground">GET /api/v1/rankings</p>
+                    <p className="text-muted-foreground">GET /api/v1/rankings?mode=risk_adjusted</p>
+                    <p className="text-muted-foreground">GET /api/v1/rankings?asset=USDC&chain=ethereum</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Returns ranked vaults with composite scores. Supports filtering by asset, chain, protocol, and ranking mode.
                   </p>
                 </div>
+
                 <div>
-                  <h4 className="font-semibold mb-2">Core Features</h4>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                    <li>Vault Explorer: Browse and filter 100+ DeFi yield opportunities</li>
-                    <li>Risk Scoring: Transparent, explainable risk assessments</li>
-                    <li>Yield Radar: Real-time feed of meaningful vault changes</li>
-                    <li>Portfolio Analytics: Monitor treasury allocations and exposures</li>
+                  <h4 className="font-semibold mb-3 text-accent">Vaults</h4>
+                  <div className="space-y-2 font-mono text-sm bg-muted/30 p-4 rounded-lg">
+                    <p className="text-muted-foreground">GET /api/v1/vaults</p>
+                    <p className="text-muted-foreground">GET /api/v1/vaults/:id</p>
+                    <p className="text-muted-foreground">GET /api/v1/vaults/:id/risk</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-3 text-accent">Reports</h4>
+                  <div className="space-y-2 font-mono text-sm bg-muted/30 p-4 rounded-lg">
+                    <p className="text-muted-foreground">GET /api/v1/reports/vault/:address</p>
+                    <p className="text-muted-foreground">GET /api/v1/reports/portfolio/:wallet</p>
+                    <p className="text-muted-foreground">GET /api/v1/reports/allocation/:wallet</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Generate comprehensive DD reports with strategy analysis, risk breakdown, and recommendations.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-3 text-accent">Portfolio Tracking</h4>
+                  <div className="space-y-2 font-mono text-sm bg-muted/30 p-4 rounded-lg">
+                    <p className="text-muted-foreground">GET /api/v1/portfolios/:address</p>
+                    <p className="text-muted-foreground">GET /api/v1/radar/events</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Ranking Algorithms</CardTitle>
+                <CardDescription>Understanding our multi-dimensional scoring system</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Rankings use composite scores based on weighted factors. Each mode optimizes for different allocation strategies:
+                </p>
+                
+                <div className="space-y-4">
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <h4 className="font-semibold mb-2">Risk-Adjusted (Default)</h4>
+                    <p className="text-sm text-muted-foreground mb-2">Balanced weighting for conservative allocations</p>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>• APY: 25% weight</li>
+                      <li>• Risk Score: 35% weight</li>
+                      <li>• Liquidity: 20% weight</li>
+                      <li>• Audit Quality: 10% weight</li>
+                      <li>• Dependency Complexity: 5% weight</li>
+                      <li>• Incentive Dependence: 5% weight</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <h4 className="font-semibold mb-2">Highest Yield</h4>
+                    <p className="text-sm text-muted-foreground">Optimized for maximum APY (60% weight on yield)</p>
+                  </div>
+
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <h4 className="font-semibold mb-2">Institutional Fit</h4>
+                    <p className="text-sm text-muted-foreground">Emphasizes audit quality (20%) and liquidity (25%)</p>
+                  </div>
+
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <h4 className="font-semibold mb-2">Best Liquidity</h4>
+                    <p className="text-sm text-muted-foreground">Prioritizes exit capacity (45% weight on liquidity)</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Report Types</CardTitle>
+                <CardDescription>Comprehensive due diligence reports</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Vault DD Report</h4>
+                  <p className="text-sm text-muted-foreground mb-2">Complete strategy and risk analysis including:</p>
+                  <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                    <li>Strategy description and complexity assessment</li>
+                    <li>Yield source decomposition (real vs. incentive)</li>
+                    <li>Dependency mapping with criticality analysis</li>
+                    <li>Contract risk (audits, upgradeability, timelocks)</li>
+                    <li>Liquidity profile and exit capacity</li>
+                    <li>Overall risk score with factor breakdown</li>
+                    <li>Red flags and recommendations</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Portfolio Report</h4>
+                  <p className="text-sm text-muted-foreground mb-2">Treasury analytics with:</p>
+                  <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                    <li>Wallet NAV and position summary</li>
+                    <li>Asset, protocol, and chain exposure breakdowns</li>
+                    <li>Concentration risk analysis (Herfindahl Index)</li>
+                    <li>Yield source attribution</li>
+                    <li>Diversification recommendations</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Allocation Report</h4>
+                  <p className="text-sm text-muted-foreground mb-2">Optimized recommendations for:</p>
+                  <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                    <li>Target asset and risk band allocations</li>
+                    <li>Vault selection with rationale</li>
+                    <li>Position sizing with liquidity constraints</li>
+                    <li>Downside considerations and risk factors</li>
                   </ul>
                 </div>
               </CardContent>
@@ -589,69 +701,25 @@ function App() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Risk Framework</CardTitle>
-                <CardDescription>Understanding our risk scoring methodology</CardDescription>
+                <CardTitle>Authentication & Rate Limits</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Risk scores range from 0-10 and aggregate multiple risk factors with transparent weighting:
-                </p>
-                <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li><strong>Smart Contract Security (30%):</strong> Audit coverage, code complexity, historical incidents</li>
-                  <li><strong>Liquidity Risk (25%):</strong> TVL depth, withdrawal capacity, utilization rates</li>
-                  <li><strong>Market Risk (20%):</strong> Asset volatility, depeg scenarios, incentive sustainability</li>
-                  <li><strong>Protocol Stability (15%):</strong> Protocol maturity, TVL history, governance strength</li>
-                  <li><strong>Governance & Admin (10%):</strong> Admin controls, timelock delays, upgradeability</li>
-                </ul>
-                <div className="mt-4 p-4 bg-muted rounded-lg">
-                  <p className="text-sm">
-                    <strong>Institutional Grade:</strong> Vaults with risk score ≤4.0, TVL ≥$50M, and verified status.
-                  </p>
+              <CardContent className="space-y-3">
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <div className="font-medium mb-1">Free Tier</div>
+                  <p className="text-sm text-muted-foreground">100 requests/day, public endpoints only</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Yield Decomposition</CardTitle>
-                <CardDescription>How we break down APY sources</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Total APY is decomposed into sustainable and non-sustainable components:
-                </p>
-                <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  <li><strong>Real Yield:</strong> Sustainable earnings from fees and protocol revenue</li>
-                  <li><strong>Incentive Yield:</strong> Token rewards that may decline over time</li>
-                  <li><strong>Trading Fees:</strong> DEX trading fees, borrow interest, etc.</li>
-                  <li><strong>Base Yield:</strong> Core protocol emissions and staking rewards</li>
-                </ul>
-                <div className="mt-4 p-4 bg-muted rounded-lg">
-                  <p className="text-sm">
-                    <strong>Sustainability Assessment:</strong> Higher real yield percentage indicates more sustainable returns.
-                  </p>
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <div className="font-medium mb-1">Pro Tier</div>
+                  <p className="text-sm text-muted-foreground">1,000 requests/day, full API access including reports</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>API Documentation</CardTitle>
-                <CardDescription>Integrate Yield Terminal data into your systems</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Available for Pro, Team, and Institutional plans. RESTful API with comprehensive vault and portfolio data.
-                </p>
-                <div className="space-y-2 font-mono text-sm">
-                  <p className="text-muted-foreground">GET /api/v1/vaults</p>
-                  <p className="text-muted-foreground">GET /api/v1/vaults/:id</p>
-                  <p className="text-muted-foreground">GET /api/v1/portfolios/:address</p>
-                  <p className="text-muted-foreground">GET /api/v1/radar/events</p>
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <div className="font-medium mb-1">Team Tier</div>
+                  <p className="text-sm text-muted-foreground">10,000 requests/day, priority support</p>
                 </div>
-                <Button variant="outline" className="mt-4">
-                  View Full API Docs
-                </Button>
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <div className="font-medium mb-1">Institutional</div>
+                  <p className="text-sm text-muted-foreground">Unlimited requests, custom SLA</p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -686,6 +754,12 @@ function App() {
         return <VaultExplorer onNavigateToVault={navigateToVault} watchlist={safeWatchlist} onToggleWatchlist={toggleWatchlist} renderNav={renderNav} />;
       case 'vault-detail':
         return selectedVaultId ? <VaultDetail vaultId={selectedVaultId} onNavigateBack={navigateBack} renderNav={renderNav} watchlist={safeWatchlist} onToggleWatchlist={toggleWatchlist} /> : null;
+      case 'rankings':
+        return <RankingsPage renderNav={renderNav} onNavigateToVault={navigateToVault} onGenerateReport={navigateToVaultReport} />;
+      case 'vault-report':
+        return selectedVaultId ? <VaultReportView vaultId={selectedVaultId} renderNav={renderNav} onNavigateBack={() => setCurrentPage('rankings')} /> : null;
+      case 'portfolio-report':
+        return <PortfolioReportView portfolioId={selectedPortfolioId} renderNav={renderNav} onNavigateBack={() => setCurrentPage('portfolio-api')} />;
       case 'radar':
         return <YieldRadar onNavigateToVault={navigateToVault} renderNav={renderNav} />;
       case 'portfolio':
