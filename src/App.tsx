@@ -42,8 +42,9 @@ import { PortfolioReportView } from '@/components/PortfolioReportView';
 import { AIPortfolioGenerator } from '@/components/AIPortfolioGenerator';
 import { ApiDemo } from '@/components/ApiDemo';
 import { PortfolioWithWallet } from '@/components/PortfolioWithWallet';
+import { RealDataDashboard } from '@/components/RealDataDashboard';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -100,6 +101,15 @@ function App() {
         
         {showFull && (
           <div className="flex items-center gap-2">
+            <Button 
+              variant={currentPage === 'real-data' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('real-data')}
+              size="sm"
+              className="bg-accent/10 hover:bg-accent/20 border border-accent/30"
+            >
+              <Database className="mr-2" size={18} weight="fill" />
+              Live Data
+            </Button>
             <Button 
               variant={currentPage === 'vaults' || currentPage === 'vault-detail' ? 'secondary' : 'ghost'}
               onClick={() => setCurrentPage('vaults')}
@@ -200,6 +210,10 @@ function App() {
             </p>
 
             <div className="flex items-center justify-center gap-4 pt-4">
+              <Button size="lg" onClick={() => setCurrentPage('real-data')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Database className="mr-2" size={20} weight="fill" />
+                Live Blockchain Data
+              </Button>
               <Button size="lg" onClick={() => setCurrentPage('ai-portfolio')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
                 <Lightning className="mr-2" size={20} weight="fill" />
                 AI Reports
@@ -212,16 +226,62 @@ function App() {
                 <Vault className="mr-2" size={20} />
                 Explore Vaults
               </Button>
-              <Button size="lg" variant="ghost" onClick={() => setCurrentPage('api-demo')}>
-                <Database className="mr-2" size={20} />
-                API Demo
-              </Button>
             </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-16">
+        <Card className="border-2 border-accent/50 bg-gradient-to-br from-accent/10 via-accent/5 to-background mb-16">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-3 bg-accent/20 rounded-xl">
+                    <Database className="text-accent" size={32} weight="fill" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl mb-1">Real Blockchain Data</CardTitle>
+                    <Badge className="bg-accent text-accent-foreground">LIVE</Badge>
+                  </div>
+                </div>
+                <CardDescription className="text-base">
+                  Live vault data from 500+ DeFi protocols via DeFiLlama API + Direct RPC integration
+                </CardDescription>
+              </div>
+              <Button 
+                onClick={() => setCurrentPage('real-data')} 
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground"
+              >
+                <Database className="mr-2" size={20} weight="fill" />
+                View Live Data
+                <ArrowRight className="ml-2" size={20} />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Data Sources</p>
+                <p className="text-sm text-muted-foreground">DeFiLlama Yields API + Blockchain RPC</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Coverage</p>
+                <p className="text-sm text-muted-foreground">500+ vaults across 6 chains</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Update Frequency</p>
+                <p className="text-sm text-muted-foreground">Real-time with 5min cache</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Protocols</p>
+                <p className="text-sm text-muted-foreground">Aave, Morpho, Yearn, Curve, Pendle & more</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="border-2 border-accent/50 bg-gradient-to-br from-accent/10 via-accent/5 to-background mb-16">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -824,6 +884,15 @@ function App() {
     switch (currentPage) {
       case 'landing':
         return renderLanding();
+      case 'real-data':
+        return (
+          <div className="min-h-screen bg-background">
+            {renderNav()}
+            <div className="container mx-auto px-6 py-12">
+              <RealDataDashboard onSelectVault={navigateToVault} />
+            </div>
+          </div>
+        );
       case 'vaults':
         return <VaultExplorer onNavigateToVault={navigateToVault} watchlist={safeWatchlist} onToggleWatchlist={toggleWatchlist} renderNav={renderNav} />;
       case 'vault-detail':

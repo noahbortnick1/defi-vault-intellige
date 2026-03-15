@@ -1,6 +1,16 @@
-# DeFi Vault Intelligence Platform
+# DeFi Vault Intelligence Platform - Real Blockchain Data Edition
 
-An institutional-grade due diligence and treasury analytics platform for DeFi yield vaults, built for funds, treasuries, and developers who need intelligent rankings, comprehensive DD reports, and data-driven allocation insights.
+An institutional-grade due diligence and treasury analytics platform for DeFi yield vaults with **REAL BLOCKCHAIN DATA**, built for funds, treasuries, and developers who need intelligent rankings, comprehensive DD reports, and data-driven allocation insights.
+
+## 🔥 Real Data Integration
+
+This platform now features **production-ready blockchain data integration**:
+
+- **DeFiLlama Yields API**: Aggregates 500+ vaults from major DeFi protocols
+- **Direct RPC Integration**: Ethereum, Arbitrum, Base, Optimism, Polygon, BSC
+- **Real-time Updates**: 5-minute cache with instant refresh capability
+- **Live TVL & APY**: Actual on-chain data, not mocks
+- **500+ Protocols**: Aave, Morpho, Yearn, Curve, Pendle, Compound, and more
 
 **Experience Qualities**:
 1. **Professional** - Bloomberg-level data density and clarity with institutional typography and color choices that convey authority and precision
