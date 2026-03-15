@@ -88,12 +88,14 @@ src/components/ArchitectureVisualization.tsx
 src/components/DiscoveryEnginePanel.tsx
 src/components/MetricCard.tsx
 src/components/PortfolioApiView.tsx
+src/components/PortfolioFinancialsView.tsx
 src/components/PortfolioReportView.tsx
 src/components/PortfolioView.tsx
 src/components/RankingsPage.tsx
 src/components/RiskBadge.tsx
 src/components/VaultDetail.tsx
 src/components/VaultExplorer.tsx
+src/components/VaultFinancialsView.tsx
 src/components/VaultReportView.tsx
 src/components/WalletTracker.tsx
 src/components/YieldChart.tsx
@@ -111,6 +113,8 @@ src/lib/discovery/onchain.ts
 src/lib/discovery/registry.ts
 src/lib/discovery/strategy.ts
 src/lib/discovery/types.ts
+src/lib/financialApi.ts
+src/lib/financialData.ts
 src/lib/format.ts
 src/lib/formatters.ts
 src/lib/mockData.ts
