@@ -21,6 +21,7 @@ DISCOVERY_ENGINE_QUICK_START.md
 DISCOVERY_ENGINE_SUMMARY.md
 FINANCIAL_REPORTING_IMPLEMENTATION.md
 IMPLEMENTATION_COMPLETE.md
+IMPLEMENTATION_COMPLETE_REAL_DATA.md
 IMPLEMENTATION_SUMMARY.md
 MIGRATION.md
 PORTFOLIO_API.md
@@ -31,6 +32,7 @@ README.md
 README_RANKINGS_REPORTS.md
 README_YIELD_TERMINAL.md
 README_YIELD_TERMINAL_SPARK.md
+REAL_DATA_INTEGRATION.md
 REFACTORING_SUMMARY.md
 WALLET_INTEGRATION.md
 WALLET_TRACKER_README.md
@@ -79,6 +81,7 @@ src/App.tsx
 src/ErrorFallback.tsx
 src/api/client.ts
 src/api/index.ts
+src/api/realDataService.ts
 src/api/seedData.ts
 src/api/service.ts
 src/api/types.ts
@@ -96,6 +99,7 @@ src/components/PortfolioReportView.tsx
 src/components/PortfolioView.tsx
 src/components/PortfolioWithWallet.tsx
 src/components/RankingsPage.tsx
+src/components/RealDataDashboard.tsx
 src/components/RiskBadge.tsx
 src/components/VaultDetail.tsx
 src/components/VaultExplorer.tsx
@@ -106,12 +110,14 @@ src/components/WalletTracker.tsx
 src/components/YieldChart.tsx
 src/components/YieldRadar.tsx
 src/hooks/use-rankings-api.ts
+src/hooks/use-real-vaults.ts
 src/hooks/use-vault-api.ts
 src/hooks/use-vault-report.ts
 src/hooks/use-vaults-api.ts
 src/hooks/use-wallet-connect.ts
 src/index.css
 src/lib/aiPortfolioReport.ts
+src/lib/blockchainData.ts
 src/lib/discovery/aggregator.ts
 src/lib/discovery/engine.ts
 src/lib/discovery/index.ts
