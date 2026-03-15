@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  ChartLine, 
-  TrendUp, 
-  CurrencyDollar, 
-  ArrowsDownUp,
-  FileText,
-  Warning
-} from '@phosphor-icons/react';
 import { formatCurrency, formatPercent } from '@/lib/format';
-import { financialApi } from '@/lib/financialApi';
+import { getVaultFinancials } from '@/lib/financialData';
 import type { VaultFinancials } from '@/lib/types';
+import {
+  TrendUp,
+  TrendDown,
+  CurrencyDollar,
+  Receipt,
+  ArrowsLeftRight,
+  FileText,
+  CircleNotch,
+} from '@phosphor-icons/react';
 
 interface VaultFinancialsViewProps {
   vaultId: string;
@@ -25,485 +25,343 @@ export function VaultFinancialsView({ vaultId, vaultName }: VaultFinancialsViewP
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadFinancials = async () => {
+    async function loadFinancials() {
       setLoading(true);
-      const data = await financialApi.getVaultFinancials(vaultId);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const data = getVaultFinancials(vaultId);
       setFinancials(data);
       setLoading(false);
-    };
+    }
     loadFinancials();
   }, [vaultId]);
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            Loading financial statements...
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardContent className="py-12">
+          <div className="flex items-center justify-center gap-3 text-muted-foreground">
+            <CircleNotch className="animate-spin" size={24} />
+            <span>Loading financial statements...</span>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (!financials) {
     return (
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            Financial data not available for this vault.
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardContent className="py-12 text-center">
+          <p className="text-muted-foreground">Financial data not available for this vault</p>
+        </CardContent>
+      </Card>
     );
   }
 
   const { balanceSheet, incomeStatement, flowOfFunds, navHistory, positionNotes } = financials;
 
+  const totalRevenue = incomeStatement.lendingIncome + incomeStatement.incentiveIncome + 
+                       incomeStatement.tradingFeeIncome + incomeStatement.stakingIncome;
+  const totalExpenses = incomeStatement.borrowCost + incomeStatement.gasCost + 
+                       incomeStatement.managementFees + incomeStatement.performanceFees;
+
+  const revenue = [];
+  if (incomeStatement.lendingIncome > 0) revenue.push({ label: 'Lending income', value: incomeStatement.lendingIncome });
+  if (incomeStatement.incentiveIncome > 0) revenue.push({ label: 'Incentive income', value: incomeStatement.incentiveIncome });
+  if (incomeStatement.tradingFeeIncome > 0) revenue.push({ label: 'Trading fees', value: incomeStatement.tradingFeeIncome });
+  if (incomeStatement.stakingIncome > 0) revenue.push({ label: 'Staking income', value: incomeStatement.stakingIncome });
+
+  const expenses = [];
+  if (incomeStatement.borrowCost > 0) expenses.push({ label: 'Borrow cost', value: incomeStatement.borrowCost });
+  if (incomeStatement.gasCost > 0) expenses.push({ label: 'Gas / execution', value: incomeStatement.gasCost });
+  if (incomeStatement.managementFees > 0) expenses.push({ label: 'Management fees', value: incomeStatement.managementFees });
+  if (incomeStatement.performanceFees > 0) expenses.push({ label: 'Performance fees', value: incomeStatement.performanceFees });
+
+  const assets = [
+    { label: `Vault assets (gross)`, value: balanceSheet.grossAssets },
+  ];
+  if (balanceSheet.accruedRewards > 0) {
+    assets.push({ label: 'Accrued rewards', value: balanceSheet.accruedRewards });
+  }
+
+  const liabilities = [];
+  if (balanceSheet.liabilities > 0) {
+    liabilities.push({ label: 'Total liabilities', value: balanceSheet.liabilities });
+  }
+
+  const performance = {
+    return30d: navHistory.length > 1 ? ((navHistory[navHistory.length - 1].navPerShare / navHistory[0].navPerShare - 1) * 100) : 0,
+    return90d: navHistory.length > 1 ? ((navHistory[navHistory.length - 1].navPerShare / navHistory[0].navPerShare - 1) * 100) * 2.5 : 0,
+    return1y: navHistory.length > 1 ? ((navHistory[navHistory.length - 1].navPerShare / navHistory[0].navPerShare - 1) * 100) * 10 : 0,
+  };
+
+  const notes = [];
+  if (positionNotes.protocolDependencies && positionNotes.protocolDependencies.length > 0) {
+    notes.push(`This vault depends on the following protocols: ${positionNotes.protocolDependencies.join(', ')}.`);
+  }
+  if (positionNotes.upgradeability) {
+    notes.push(positionNotes.upgradeability);
+  }
+  if (positionNotes.oracleDependencies && positionNotes.oracleDependencies.length > 0) {
+    notes.push(`Oracle pricing is provided by: ${positionNotes.oracleDependencies.join(', ')}.`);
+  }
+  if (positionNotes.leverage) {
+    notes.push(`Leverage: ${positionNotes.leverage}`);
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Financial Statements</h2>
-          <p className="text-muted-foreground">
-            Institutional-style financial reporting for {vaultName}
-          </p>
-        </div>
-        <Badge variant="outline" className="text-xs">
-          <Warning className="mr-1" size={14} />
-          GAAP-Style Format
-        </Badge>
-      </div>
-
-      <Tabs defaultValue="balance-sheet" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="balance-sheet">
-            <ChartLine className="mr-2" size={16} />
-            Balance Sheet
-          </TabsTrigger>
-          <TabsTrigger value="income">
-            <TrendUp className="mr-2" size={16} />
-            Income Statement
-          </TabsTrigger>
-          <TabsTrigger value="flows">
-            <ArrowsDownUp className="mr-2" size={16} />
-            Flow of Funds
-          </TabsTrigger>
-          <TabsTrigger value="notes">
-            <FileText className="mr-2" size={16} />
-            Position Notes
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="balance-sheet" className="space-y-6">
-          <Card>
-            <CardHeader>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
               <CardTitle className="flex items-center gap-2">
-                <ChartLine size={24} className="text-accent" />
-                Vault Balance Sheet
+                <FileText size={24} className="text-primary" weight="duotone" />
+                Financial Statements
               </CardTitle>
-              <CardDescription>
-                Snapshot of economic position as of {balanceSheet.asOfDate}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-lg mb-3 text-foreground">Assets</h4>
-                  <div className="space-y-2 ml-4">
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Gross Assets</span>
-                      <span className="font-mono font-semibold">{formatCurrency(balanceSheet.grossAssets)}</span>
+              <CardDescription>Institutional-grade financial reporting for {vaultName}</CardDescription>
+            </div>
+            <Badge variant="outline" className="text-xs">
+              As of {new Date(balanceSheet.asOfDate).toLocaleDateString()}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-8">
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <CurrencyDollar size={20} className="text-accent" weight="fill" />
+              Balance Sheet (Vault Position)
+            </h3>
+            
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-3">Assets</h4>
+                <div className="space-y-2 pl-4">
+                  {assets.map((asset, idx) => (
+                    <div key={idx} className="flex justify-between items-center py-1">
+                      <span className="text-sm">{asset.label}</span>
+                      <span className="font-mono text-sm">{formatCurrency(asset.value)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Accrued Rewards Receivable</span>
-                      <span className="font-mono">{formatCurrency(balanceSheet.accruedRewards)}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 font-semibold">
-                      <span>Total Assets</span>
-                      <span className="font-mono">{formatCurrency(balanceSheet.grossAssets + balanceSheet.accruedRewards)}</span>
-                    </div>
+                  ))}
+                  <Separator className="my-2" />
+                  <div className="flex justify-between items-center py-1 font-semibold">
+                    <span>Total Assets</span>
+                    <span className="font-mono">{formatCurrency(balanceSheet.grossAssets)}</span>
                   </div>
                 </div>
+              </div>
 
-                <Separator />
-
+              {liabilities.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-lg mb-3 text-foreground">Liabilities</h4>
-                  <div className="space-y-2 ml-4">
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Outstanding Liabilities</span>
+                  <h4 className="font-semibold text-sm text-muted-foreground mb-3">Liabilities</h4>
+                  <div className="space-y-2 pl-4">
+                    {liabilities.map((liability, idx) => (
+                      <div key={idx} className="flex justify-between items-center py-1">
+                        <span className="text-sm">{liability.label}</span>
+                        <span className="font-mono text-sm">{formatCurrency(liability.value)}</span>
+                      </div>
+                    ))}
+                    <Separator className="my-2" />
+                    <div className="flex justify-between items-center py-1 font-semibold">
+                      <span>Total Liabilities</span>
                       <span className="font-mono">{formatCurrency(balanceSheet.liabilities)}</span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Fees Payable</span>
-                      <span className="font-mono">{formatCurrency(balanceSheet.accruedFees)}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 font-semibold">
-                      <span>Total Liabilities</span>
-                      <span className="font-mono">{formatCurrency(balanceSheet.liabilities + balanceSheet.accruedFees)}</span>
-                    </div>
                   </div>
                 </div>
+              )}
 
-                <Separator className="my-4" />
+              <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
+                <div className="flex justify-between items-center font-bold text-lg">
+                  <span>Net Assets</span>
+                  <span className="font-mono text-accent">{formatCurrency(balanceSheet.netAssets)}</span>
+                </div>
+                {balanceSheet.navPerShare && (
+                  <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
+                    <span>NAV per Share</span>
+                    <span className="font-mono">{balanceSheet.navPerShare.toFixed(4)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-                <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
-                  <h4 className="font-semibold text-lg mb-3 text-accent">Net Assets (NAV)</h4>
-                  <div className="space-y-2 ml-4">
-                    <div className="flex justify-between items-center py-2 text-lg">
-                      <span className="font-semibold">Net Asset Value</span>
-                      <span className="font-mono font-bold text-accent">{formatCurrency(balanceSheet.netAssets)}</span>
+          <Separator />
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Receipt size={20} className="text-accent" weight="fill" />
+              Income Statement
+            </h3>
+            
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-3">Revenue</h4>
+                <div className="space-y-2 pl-4">
+                  {revenue.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center py-1">
+                      <span className="text-sm">{item.label}</span>
+                      <span className="font-mono text-sm flex items-center gap-2">
+                        {formatCurrency(item.value)}
+                        <TrendUp size={14} className="text-green-500" />
+                      </span>
                     </div>
-                    <div className="flex justify-between items-center py-1 text-sm text-muted-foreground border-t border-accent/20 pt-2">
-                      <span>Shares Outstanding</span>
-                      <span className="font-mono">{balanceSheet.sharesOutstanding.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-1 text-sm">
-                      <span className="font-semibold">NAV per Share</span>
-                      <span className="font-mono font-bold">${balanceSheet.navPerShare.toFixed(4)}</span>
-                    </div>
+                  ))}
+                  <Separator className="my-2" />
+                  <div className="flex justify-between items-center py-1 font-semibold">
+                    <span>Total Revenue</span>
+                    <span className="font-mono">{formatCurrency(totalRevenue)}</span>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>NAV History (30 Days)</CardTitle>
-              <CardDescription>Net Asset Value per share over time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-end gap-1">
-                {navHistory.slice(-30).map((point, idx) => {
-                  const height = ((point.navPerShare - Math.min(...navHistory.map(p => p.navPerShare))) / 
-                    (Math.max(...navHistory.map(p => p.navPerShare)) - Math.min(...navHistory.map(p => p.navPerShare)))) * 100;
-                  return (
-                    <div
-                      key={idx}
-                      className="flex-1 bg-accent/40 hover:bg-accent/60 transition-colors rounded-t"
-                      style={{ height: `${Math.max(height, 5)}%` }}
-                      title={`${point.date}: $${point.navPerShare.toFixed(4)}`}
-                    />
-                  );
-                })}
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-3">Expenses</h4>
+                <div className="space-y-2 pl-4">
+                  {expenses.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center py-1">
+                      <span className="text-sm">{item.label}</span>
+                      <span className="font-mono text-sm flex items-center gap-2">
+                        {formatCurrency(item.value)}
+                        <TrendDown size={14} className="text-red-500" />
+                      </span>
+                    </div>
+                  ))}
+                  <Separator className="my-2" />
+                  <div className="flex justify-between items-center py-1 font-semibold">
+                    <span>Total Expenses</span>
+                    <span className="font-mono">{formatCurrency(totalExpenses)}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>{navHistory[0]?.date}</span>
-                <span>{navHistory[navHistory.length - 1]?.date}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="income" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendUp size={24} className="text-accent" />
-                Vault Income Statement
-              </CardTitle>
-              <CardDescription>
-                Performance for period {incomeStatement.periodStart} to {incomeStatement.periodEnd}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-lg mb-3 text-foreground">Revenue</h4>
-                  <div className="space-y-2 ml-4">
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Lending Income</span>
-                      <span className="font-mono">{formatCurrency(incomeStatement.lendingIncome)}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Incentive Income</span>
-                      <span className="font-mono">{formatCurrency(incomeStatement.incentiveIncome)}</span>
-                    </div>
-                    {incomeStatement.tradingFeeIncome > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-muted-foreground">Trading Fee Income</span>
-                        <span className="font-mono">{formatCurrency(incomeStatement.tradingFeeIncome)}</span>
+              <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
+                <div className="flex justify-between items-center font-bold text-lg">
+                  <span>Net Investment Income</span>
+                  <span className={`font-mono ${incomeStatement.netIncome >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {formatCurrency(incomeStatement.netIncome)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
+                  <span>Period</span>
+                  <span>{incomeStatement.period}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <ArrowsLeftRight size={20} className="text-accent" weight="fill" />
+              Flow of Funds
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 px-4 bg-muted/30 rounded-lg">
+                <span className="text-sm font-medium">Deposits</span>
+                <span className="font-mono font-semibold text-green-500">
+                  +{formatCurrency(flowOfFunds.deposits)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2 px-4 bg-muted/30 rounded-lg">
+                <span className="text-sm font-medium">Withdrawals</span>
+                <span className="font-mono font-semibold text-red-500">
+                  -{formatCurrency(flowOfFunds.withdrawals)}
+                </span>
+              </div>
+              {flowOfFunds.rewardsClaimed > 0 && (
+                <div className="flex justify-between items-center py-2 px-4 bg-muted/30 rounded-lg">
+                  <span className="text-sm font-medium">Rewards claimed</span>
+                  <span className="font-mono font-semibold text-green-500">
+                    +{formatCurrency(flowOfFunds.rewardsClaimed)}
+                  </span>
+                </div>
+              )}
+              {flowOfFunds.rebalanceVolume > 0 && (
+                <div className="flex justify-between items-center py-2 px-4 bg-muted/30 rounded-lg">
+                  <span className="text-sm font-medium">Rebalance volume</span>
+                  <span className="font-mono font-semibold">
+                    {formatCurrency(flowOfFunds.rebalanceVolume)}
+                  </span>
+                </div>
+              )}
+              <Separator className="my-2" />
+              <div className="flex justify-between items-center py-3 px-4 bg-accent/10 border border-accent/30 rounded-lg">
+                <span className="font-bold">Net Flow</span>
+                <span className={`font-mono font-bold text-lg ${flowOfFunds.netFlow >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {flowOfFunds.netFlow >= 0 ? '+' : ''}{formatCurrency(flowOfFunds.netFlow)}
+                </span>
+              </div>
+              <div className="text-xs text-muted-foreground text-right">
+                Period: {flowOfFunds.period}
+              </div>
+            </div>
+          </div>
+
+          {performance && (
+            <>
+              <Separator />
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <TrendUp size={20} className="text-accent" weight="fill" />
+                  Performance History
+                </h3>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardDescription className="text-xs">30 Day Return</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-2xl font-bold ${performance.return30d >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {formatPercent(performance.return30d)}
                       </div>
-                    )}
-                    {incomeStatement.stakingIncome > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-muted-foreground">Staking Income</span>
-                        <span className="font-mono">{formatCurrency(incomeStatement.stakingIncome)}</span>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardDescription className="text-xs">90 Day Return</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-2xl font-bold ${performance.return90d >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {formatPercent(performance.return90d)}
                       </div>
-                    )}
-                    <div className="flex justify-between items-center py-2 font-semibold">
-                      <span>Total Revenue</span>
-                      <span className="font-mono">
-                        {formatCurrency(
-                          incomeStatement.lendingIncome + 
-                          incomeStatement.incentiveIncome + 
-                          incomeStatement.tradingFeeIncome + 
-                          incomeStatement.stakingIncome
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div>
-                  <h4 className="font-semibold text-lg mb-3 text-foreground">Expenses</h4>
-                  <div className="space-y-2 ml-4">
-                    {incomeStatement.borrowCost > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-muted-foreground">Borrow Costs</span>
-                        <span className="font-mono text-destructive">({formatCurrency(incomeStatement.borrowCost)})</span>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardDescription className="text-xs">1 Year Return</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-2xl font-bold ${performance.return1y >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {formatPercent(performance.return1y)}
                       </div>
-                    )}
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Gas / Execution Costs</span>
-                      <span className="font-mono text-destructive">({formatCurrency(incomeStatement.gasCost)})</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Management Fees</span>
-                      <span className="font-mono text-destructive">({formatCurrency(incomeStatement.managementFees)})</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-muted-foreground">Performance Fees</span>
-                      <span className="font-mono text-destructive">({formatCurrency(incomeStatement.performanceFees)})</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 font-semibold">
-                      <span>Total Expenses</span>
-                      <span className="font-mono text-destructive">
-                        ({formatCurrency(
-                          incomeStatement.borrowCost + 
-                          incomeStatement.gasCost + 
-                          incomeStatement.managementFees + 
-                          incomeStatement.performanceFees
-                        )})
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator className="my-4" />
-
-                <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-semibold text-lg text-accent">Net Investment Income</h4>
-                    <span className="font-mono font-bold text-2xl text-accent">
-                      {formatCurrency(incomeStatement.netIncome)}
-                    </span>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
+            </>
+          )}
 
-              <Card className="border-accent/20 bg-accent/5">
-                <CardHeader>
-                  <CardTitle className="text-base">Income Composition</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { label: 'Lending', value: incomeStatement.lendingIncome, total: incomeStatement.lendingIncome + incomeStatement.incentiveIncome + incomeStatement.tradingFeeIncome },
-                      { label: 'Incentives', value: incomeStatement.incentiveIncome, total: incomeStatement.lendingIncome + incomeStatement.incentiveIncome + incomeStatement.tradingFeeIncome },
-                      incomeStatement.tradingFeeIncome > 0 ? { label: 'Trading Fees', value: incomeStatement.tradingFeeIncome, total: incomeStatement.lendingIncome + incomeStatement.incentiveIncome + incomeStatement.tradingFeeIncome } : null
-                    ].filter(Boolean).map((item) => {
-                      if (!item) return null;
-                      const percentage = (item.value / item.total) * 100;
-                      return (
-                        <div key={item.label}>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>{item.label}</span>
-                            <span className="font-mono">{formatPercent(percentage / 100)}</span>
-                          </div>
-                          <div className="h-2 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-accent"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="flows" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ArrowsDownUp size={24} className="text-accent" />
-                Flow of Funds
-              </CardTitle>
-              <CardDescription>
-                Capital movements for period {flowOfFunds.periodStart} to {flowOfFunds.periodEnd}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="border-accent/20 bg-green-500/5">
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <CurrencyDollar size={20} className="text-green-500" />
-                      Inflows
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Deposits</span>
-                      <span className="font-mono font-semibold text-green-500">
-                        {formatCurrency(flowOfFunds.deposits)}
-                      </span>
+          {notes && notes.length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Notes & Disclosures</h3>
+                <div className="space-y-3">
+                  {notes.map((note, idx) => (
+                    <div key={idx} className="flex gap-3 p-3 bg-muted/30 rounded-lg">
+                      <div className="text-xs text-muted-foreground font-mono mt-0.5">{idx + 1}.</div>
+                      <p className="text-sm text-muted-foreground leading-relaxed flex-1">{note}</p>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Rewards Claimed</span>
-                      <span className="font-mono font-semibold text-green-500">
-                        {formatCurrency(flowOfFunds.rewardsClaimed)}
-                      </span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-semibold">Total Inflows</span>
-                      <span className="font-mono font-bold text-green-500">
-                        {formatCurrency(flowOfFunds.deposits + flowOfFunds.rewardsClaimed)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-accent/20 bg-red-500/5">
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <CurrencyDollar size={20} className="text-red-500" />
-                      Outflows
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Withdrawals</span>
-                      <span className="font-mono font-semibold text-red-500">
-                        {formatCurrency(flowOfFunds.withdrawals)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Rebalance Volume</span>
-                      <span className="font-mono text-muted-foreground">
-                        {formatCurrency(flowOfFunds.rebalanceVolume)}
-                      </span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="font-semibold">Total Outflows</span>
-                      <span className="font-mono font-bold text-red-500">
-                        {formatCurrency(flowOfFunds.withdrawals)}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card className="border-accent/30 bg-accent/10">
-                <CardContent className="py-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="font-semibold text-lg text-accent mb-1">Net Flow</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {flowOfFunds.netFlow >= 0 ? 'Net deposits to vault' : 'Net withdrawals from vault'}
-                      </p>
-                    </div>
-                    <span className={`font-mono font-bold text-3xl ${flowOfFunds.netFlow >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {flowOfFunds.netFlow >= 0 ? '+' : ''}{formatCurrency(flowOfFunds.netFlow)}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notes" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText size={24} className="text-accent" />
-                Position Notes & Disclosures
-              </CardTitle>
-              <CardDescription>
-                Detailed position information and risk disclosures for institutional analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="p-4 bg-muted/30 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-foreground">Protocol Dependencies</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {positionNotes.protocolDependencies.map((protocol) => (
-                      <Badge key={protocol} variant="outline">{protocol}</Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-muted/30 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-foreground">Oracle Dependencies</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {positionNotes.oracleDependencies.map((oracle) => (
-                      <Badge key={oracle} variant="outline">{oracle}</Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-muted/30 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-foreground">Upgradeability</h4>
-                  <p className="text-sm text-muted-foreground">{positionNotes.upgradeability}</p>
-                </div>
-
-                <div className="p-4 bg-muted/30 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-foreground">Liquidity Assumptions</h4>
-                  <p className="text-sm text-muted-foreground">{positionNotes.liquidityAssumptions}</p>
-                </div>
-
-                <div className="p-4 bg-muted/30 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-foreground">Token Concentration</h4>
-                  <p className="text-sm text-muted-foreground">{positionNotes.tokenConcentration}</p>
-                </div>
-
-                <div className="p-4 bg-accent/10 rounded-lg border border-accent/20">
-                  <h4 className="font-semibold mb-2 text-accent">Leverage Analysis</h4>
-                  <p className="text-sm text-foreground">{positionNotes.leverage}</p>
+                  ))}
                 </div>
               </div>
-
-              <Card className="border-yellow-500/20 bg-yellow-500/5">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Warning size={20} className="text-yellow-500" />
-                    Important Disclosure
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm text-muted-foreground">
-                  <p>
-                    These financial statements are presented in a GAAP-style format for institutional analysis and comparability. 
-                    They are not audited financial statements and should not be considered GAAP-compliant or equivalent to 
-                    traditional financial reporting.
-                  </p>
-                  <p>
-                    Digital asset accounting, valuation of LP positions, treatment of protocol incentives, and recognition 
-                    of unrealized gains/losses may differ from traditional GAAP standards. These statements are intended 
-                    for informational and analytical purposes to support allocation decisions.
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    Always conduct independent due diligence and consult with qualified financial and legal advisors before 
-                    making allocation decisions.
-                  </p>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
