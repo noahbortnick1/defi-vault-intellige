@@ -343,3 +343,91 @@ export interface AllocationReport {
     reasoning: string;
   };
 }
+
+export interface VaultFinancialSnapshot {
+  id: string;
+  vaultId: string;
+  asOfDate: string;
+  grossAssets: number;
+  liabilities: number;
+  netAssets: number;
+  sharesOutstanding: number;
+  navPerShare: number;
+  accruedFees: number;
+  accruedRewards: number;
+  createdAt: string;
+}
+
+export interface VaultIncomeSnapshot {
+  id: string;
+  vaultId: string;
+  periodStart: string;
+  periodEnd: string;
+  lendingIncome: number;
+  incentiveIncome: number;
+  tradingFeeIncome: number;
+  stakingIncome: number;
+  borrowCost: number;
+  gasCost: number;
+  managementFees: number;
+  performanceFees: number;
+  netIncome: number;
+  createdAt: string;
+}
+
+export interface VaultFlowSnapshot {
+  id: string;
+  vaultId: string;
+  periodStart: string;
+  periodEnd: string;
+  deposits: number;
+  withdrawals: number;
+  rewardsClaimed: number;
+  rebalanceVolume: number;
+  netFlow: number;
+  createdAt: string;
+}
+
+export interface VaultFinancials {
+  balanceSheet: VaultFinancialSnapshot;
+  incomeStatement: VaultIncomeSnapshot;
+  flowOfFunds: VaultFlowSnapshot;
+  navHistory: Array<{
+    date: string;
+    navPerShare: number;
+    netAssets: number;
+  }>;
+  positionNotes: {
+    protocolDependencies: string[];
+    oracleDependencies: string[];
+    upgradeability: string;
+    liquidityAssumptions: string;
+    tokenConcentration: string;
+    leverage: string;
+  };
+}
+
+export interface PortfolioFinancials {
+  summary: {
+    totalAssets: number;
+    totalLiabilities: number;
+    netAssets: number;
+    realizedGains: number;
+    unrealizedGains: number;
+    asOfDate: string;
+  };
+  incomeBySource: Record<string, number>;
+  exposure: {
+    byAsset: Record<string, number>;
+    byStrategy: Record<string, number>;
+    byChain: Record<string, number>;
+    byProtocol: Record<string, number>;
+  };
+  positions: Array<{
+    vault: string;
+    cost: number;
+    marketValue: number;
+    unrealizedGain: number;
+    yieldToDate: number;
+  }>;
+}

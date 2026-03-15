@@ -92,6 +92,13 @@ The platform is organized around five first-class modules that form a complete w
 - **Progression**: Load portfolio data → Generate AI analysis via LLM → Display comprehensive report with executive summary, risk analysis, optimization recommendations, specific vault suggestions → Export or share report
 - **Success criteria**: Report generation in <5 seconds, actionable recommendations with specific vault names and allocation percentages, risk-adjusted optimization suggestions, clear explanation of reasoning, professional formatting suitable for treasury committees
 
+### Institutional Financial Reporting
+- **Functionality**: GAAP-style financial statements for vaults and portfolios including balance sheets, income statements, flow of funds, NAV tracking, and crypto-native position notes
+- **Purpose**: Bridge traditional finance reporting with crypto-native intelligence, providing CFOs, auditors, fund admins, and institutional LPs with familiar accounting-style reports while maintaining transparency on crypto-specific risks and mechanics
+- **Trigger**: User navigates to Financials tab within vault detail or portfolio pages
+- **Progression**: Select vault or portfolio → View financial tabs (Balance Sheet, Income Statement, Flows, Position Notes) → Review institutional-style statements with GAAP-style formatting → Analyze crypto-native position details → Export for stakeholder review
+- **Success criteria**: Sub-second statement loading, accurate NAV calculations, clear income/expense categorization, comprehensive position disclosures, professional formatting suitable for board presentations and audit reviews, clear disclaimer that statements are GAAP-style not GAAP-compliant
+
 ### Settings & Profile
 - **Functionality**: User preferences, alert configuration, API key management, workspace settings
 - **Purpose**: Customize user experience and manage integrations

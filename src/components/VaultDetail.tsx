@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, ShieldCheck, Star, FileText, TrendUp, Warning, CheckCircle, Info, CircleNotch } from '@phosphor-icons/react';
 import { useVaultApi } from '@/hooks/use-vault-api';
 import { formatCurrency, formatPercent, formatDate, getRiskBgColor, getChainName, getStrategyLabel, formatAddress } from '@/lib/format';
+import { VaultFinancialsView } from '@/components/VaultFinancialsView';
 
 interface VaultDetailProps {
   vaultId: string;
@@ -195,8 +196,9 @@ export function VaultDetail({ vaultId, onNavigateBack, renderNav, watchlist, onT
           )}
 
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="financials">Financials</TabsTrigger>
               <TabsTrigger value="yield">Yield Analysis</TabsTrigger>
               <TabsTrigger value="risk">Risk Assessment</TabsTrigger>
               <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
@@ -272,6 +274,10 @@ export function VaultDetail({ vaultId, onNavigateBack, renderNav, watchlist, onT
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="financials" className="space-y-4">
+              <VaultFinancialsView vaultId={vault.id} vaultName={vault.name} />
             </TabsContent>
 
             <TabsContent value="yield" className="space-y-4">
