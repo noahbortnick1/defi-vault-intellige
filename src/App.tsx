@@ -39,9 +39,10 @@ import { WalletTracker } from '@/components/WalletTracker';
 import { RankingsPage } from '@/components/RankingsPage';
 import { VaultReportView } from '@/components/VaultReportView';
 import { PortfolioReportView } from '@/components/PortfolioReportView';
+import { AIPortfolioGenerator } from '@/components/AIPortfolioGenerator';
 import { ApiDemo } from '@/components/ApiDemo';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'pricing' | 'docs' | 'api-demo' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -115,12 +116,21 @@ function App() {
               Rankings
             </Button>
             <Button 
-              variant={currentPage === 'portfolio' || currentPage === 'portfolio-api' || currentPage === 'portfolio-report' ? 'secondary' : 'ghost'}
+              variant={currentPage === 'portfolio' || currentPage === 'portfolio-api' || currentPage === 'portfolio-report' || currentPage === 'ai-portfolio' ? 'secondary' : 'ghost'}
               onClick={() => setCurrentPage('portfolio-api')}
               size="sm"
             >
               <Briefcase className="mr-2" size={18} />
               Portfolio
+            </Button>
+            <Button 
+              variant={currentPage === 'ai-portfolio' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('ai-portfolio')}
+              size="sm"
+              className="bg-accent/10 hover:bg-accent/20 border border-accent/30"
+            >
+              <Lightning className="mr-2" size={18} weight="fill" />
+              AI Reports
             </Button>
             <Button 
               variant={currentPage === 'radar' ? 'secondary' : 'ghost'}
@@ -189,7 +199,11 @@ function App() {
             </p>
 
             <div className="flex items-center justify-center gap-4 pt-4">
-              <Button size="lg" onClick={() => setCurrentPage('rankings')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button size="lg" onClick={() => setCurrentPage('ai-portfolio')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Lightning className="mr-2" size={20} weight="fill" />
+                AI Reports
+              </Button>
+              <Button size="lg" onClick={() => setCurrentPage('rankings')} className="bg-primary hover:bg-primary/90">
                 <ChartBar className="mr-2" size={20} />
                 View Rankings
               </Button>
@@ -199,11 +213,7 @@ function App() {
               </Button>
               <Button size="lg" variant="ghost" onClick={() => setCurrentPage('api-demo')}>
                 <Database className="mr-2" size={20} />
-                Try API Demo
-              </Button>
-              <Button size="lg" variant="ghost" onClick={() => setCurrentPage('docs')}>
-                <Book className="mr-2" size={20} />
-                API Docs
+                API Demo
               </Button>
             </div>
           </div>
@@ -211,6 +221,56 @@ function App() {
       </div>
 
       <div className="container mx-auto px-6 py-16">
+        <Card className="border-2 border-accent/50 bg-gradient-to-br from-accent/10 via-accent/5 to-background mb-16">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-3 bg-accent/20 rounded-xl">
+                    <Lightning className="text-accent" size={32} weight="fill" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl mb-1">AI-Powered Portfolio Reports</CardTitle>
+                    <Badge className="bg-accent text-accent-foreground">NEW</Badge>
+                  </div>
+                </div>
+                <CardDescription className="text-base">
+                  Generate comprehensive portfolio analysis for different sizes and risk profiles using GPT-4
+                </CardDescription>
+              </div>
+              <Button 
+                onClick={() => setCurrentPage('ai-portfolio')} 
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground"
+              >
+                <Lightning className="mr-2" size={20} weight="fill" />
+                Try AI Reports
+                <ArrowRight className="ml-2" size={20} />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Portfolio Sizes</p>
+                <p className="text-sm text-muted-foreground">Small ($50K-$500K) to Institutional ($50M+)</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Risk Profiles</p>
+                <p className="text-sm text-muted-foreground">Conservative to Aggressive strategies</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">AI Analysis</p>
+                <p className="text-sm text-muted-foreground">GPT-4 powered insights & recommendations</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Optimization</p>
+                <p className="text-sm text-muted-foreground">Actionable rebalancing & new opportunities</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <Card className="border-2 border-accent/50 hover:border-accent transition-colors bg-gradient-to-br from-accent/5 to-background">
             <CardHeader>
@@ -779,6 +839,15 @@ function App() {
         return <PortfolioView portfolioId={selectedPortfolioId} onSelectPortfolio={setSelectedPortfolioId} renderNav={renderNav} />;
       case 'portfolio-api':
         return <PortfolioApiView renderNav={renderNav} />;
+      case 'ai-portfolio':
+        return (
+          <div className="min-h-screen bg-background">
+            {renderNav()}
+            <div className="container mx-auto px-6 py-12">
+              <AIPortfolioGenerator />
+            </div>
+          </div>
+        );
       case 'discovery':
         return renderDiscovery();
       case 'wallet-tracker':
