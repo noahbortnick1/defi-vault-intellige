@@ -21,6 +21,7 @@ README.md
 README_YIELD_TERMINAL.md
 README_YIELD_TERMINAL_SPARK.md
 REFACTORING_SUMMARY.md
+WALLET_TRACKER_README.md
 YIELD_TERMINAL_ARCHITECTURE.md
 YIELD_TERMINAL_PRD.md
 YIELD_TERMINAL_SPARK_PRD.md
@@ -73,6 +74,7 @@ src/components/PortfolioView.tsx
 src/components/RiskBadge.tsx
 src/components/VaultDetail.tsx
 src/components/VaultExplorer.tsx
+src/components/WalletTracker.tsx
 src/components/YieldChart.tsx
 src/components/YieldRadar.tsx
 src/index.css
@@ -89,3 +91,4 @@ src/lib/mockData.ts
 src/lib/portfolioApi.ts
 src/lib/risk.ts
 src/lib/types.ts
+src/lib/web3Rpc.ts
