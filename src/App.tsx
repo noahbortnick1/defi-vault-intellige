@@ -26,6 +26,7 @@ import {
   Trophy,
   FileText,
   Target,
+  TreeStructure,
 } from '@phosphor-icons/react';
 import { VAULTS, RADAR_EVENTS, DEMO_PORTFOLIOS, PROTOCOLS } from '@/lib/mockData';
 import { formatCurrency, formatPercent, getRiskBgColor, getChainName, getStrategyLabel } from '@/lib/format';
@@ -46,8 +47,10 @@ import { PortfolioWithWallet } from '@/components/PortfolioWithWallet';
 import { RealDataDashboard } from '@/components/RealDataDashboard';
 import { ResearchLibrary } from '@/components/ResearchLibrary';
 import { AllocationEngine } from '@/components/AllocationEngine';
+import { StrategyIntelligence } from '@/components/StrategyIntelligence';
+import { DependencyGraph } from '@/components/DependencyGraph';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'settings' | 'research' | 'allocation';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'settings' | 'research' | 'allocation' | 'strategy-intelligence' | 'dependency-graph';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -153,6 +156,22 @@ function App() {
             >
               <Lightning className="mr-2" size={18} />
               Radar
+            </Button>
+            <Button 
+              variant={currentPage === 'strategy-intelligence' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('strategy-intelligence')}
+              size="sm"
+            >
+              <ChartLine className="mr-2" size={18} />
+              Strategies
+            </Button>
+            <Button 
+              variant={currentPage === 'dependency-graph' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('dependency-graph')}
+              size="sm"
+            >
+              <TreeStructure className="mr-2" size={18} />
+              Dependencies
             </Button>
             <Button 
               variant={currentPage === 'research' ? 'secondary' : 'ghost'}
@@ -430,6 +449,46 @@ function App() {
               <Button variant="outline" size="sm" className="border-accent/40 hover:bg-accent/10">
                 <Target className="mr-2" size={16} weight="fill" />
                 Simulate Allocation
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card
+            className="border-2 border-border/50 hover:border-accent/30 transition-colors cursor-pointer"
+            onClick={() => setCurrentPage('strategy-intelligence')}
+          >
+            <CardHeader>
+              <ChartLine className="text-accent mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Strategy Intelligence</CardTitle>
+              <Badge className="w-fit bg-accent/10 text-accent border-accent/20 text-xs">Yield Attribution</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">
+                Automatic strategy classification with yield source decomposition. Understand where yield comes from across lending, LP, basis trade, and delta-neutral strategies.
+              </p>
+              <Button variant="outline" size="sm">
+                <ChartLine className="mr-2" size={16} />
+                View Strategies
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card
+            className="border-2 border-border/50 hover:border-orange-400/30 transition-colors cursor-pointer"
+            onClick={() => setCurrentPage('dependency-graph')}
+          >
+            <CardHeader>
+              <TreeStructure className="text-orange-400 mb-3" size={40} weight="duotone" />
+              <CardTitle className="text-xl">Dependency Graph</CardTitle>
+              <Badge className="w-fit bg-orange-500/10 text-orange-400 border-orange-400/20 text-xs">Risk Cascade</Badge>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">
+                Visual protocol dependency trees showing how risk cascades through vault stacks. Identify systemic exposure across Aave, Curve, Chainlink, and bridge dependencies.
+              </p>
+              <Button variant="outline" size="sm" className="border-orange-400/40 hover:bg-orange-500/10">
+                <TreeStructure className="mr-2" size={16} />
+                Explore Dependencies
               </Button>
             </CardContent>
           </Card>
@@ -1003,6 +1062,10 @@ function App() {
         return <ResearchLibrary renderNav={renderNav} />;
       case 'allocation':
         return <AllocationEngine renderNav={renderNav} />;
+      case 'strategy-intelligence':
+        return <StrategyIntelligence renderNav={renderNav} onNavigateToVault={navigateToVault} />;
+      case 'dependency-graph':
+        return <DependencyGraph renderNav={renderNav} onNavigateToVault={navigateToVault} />;
       default:
         return renderLanding();
     }
