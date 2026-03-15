@@ -1,13 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MagnifyingGlass, Funnel, Star, ShieldCheck, TrendUp, ArrowUp, ArrowDown } from '@phosphor-icons/react';
-import { VAULTS } from '@/lib/mockData';
+import { MagnifyingGlass, Funnel, Star, ShieldCheck, TrendUp, ArrowUp, ArrowDown, CircleNotch } from '@phosphor-icons/react';
+import { useVaultsApi } from '@/hooks/use-vaults-api';
 import { formatCurrency, formatPercent, getRiskBgColor, getChainName, getStrategyLabel } from '@/lib/format';
 import type { Vault, Chain, RiskBand, StrategyType } from '@/lib/types';
+import type { VaultsQueryParams } from '@/api/types';
 
 interface VaultExplorerProps {
   onNavigateToVault: (vaultId: string) => void;
@@ -25,40 +26,47 @@ export function VaultExplorer({ onNavigateToVault, watchlist, onToggleWatchlist,
   const [sortBy, setSortBy] = useState<'tvl' | 'apy' | 'riskScore'>('tvl');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+  const apiParams = useMemo<VaultsQueryParams>(() => {
+    const params: VaultsQueryParams = {
+      limit: 100,
+      sort: sortBy === 'riskScore' ? 'risk_score' : sortBy,
+      order: sortDirection,
+    };
+
+    if (chainFilter !== 'all') {
+      params.chain = chainFilter;
+    }
+
+    if (strategyFilter !== 'all') {
+      const strategyMap: Record<string, string> = {
+        'lending': 'lending',
+        'lp-farming': 'lp',
+        'delta-neutral': 'delta_neutral',
+        'basis-trade': 'delta_neutral',
+        'staking': 'staking',
+      };
+      params.strategy_type = strategyMap[strategyFilter] as any;
+    }
+
+    return params;
+  }, [chainFilter, strategyFilter, sortBy, sortDirection]);
+
+  const { vaults: apiVaults, loading, error, total } = useVaultsApi(apiParams);
+
   const filteredVaults = useMemo(() => {
-    let vaults = VAULTS.filter((vault) => {
+    let vaults = apiVaults.filter((vault) => {
       const matchesSearch = vault.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vault.protocolName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vault.asset.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesChain = chainFilter === 'all' || vault.chain === chainFilter;
+      
       const matchesRisk = riskFilter === 'all' || vault.riskBand === riskFilter;
-      const matchesStrategy = strategyFilter === 'all' || vault.strategyType === strategyFilter;
       const matchesInstitutional = !institutionalOnly || vault.institutionalGrade;
       
-      return matchesSearch && matchesChain && matchesRisk && matchesStrategy && matchesInstitutional;
-    });
-
-    vaults.sort((a, b) => {
-      const aVal = a[sortBy];
-      const bVal = b[sortBy];
-      
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortDirection === 'desc' ? bVal - aVal : aVal - bVal;
-      }
-      return 0;
+      return matchesSearch && matchesRisk && matchesInstitutional;
     });
 
     return vaults;
-  }, [searchTerm, chainFilter, riskFilter, strategyFilter, institutionalOnly, sortBy, sortDirection]);
-
-  const toggleSort = (key: typeof sortBy) => {
-    if (sortBy === key) {
-      setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
-    } else {
-      setSortBy(key);
-      setSortDirection('desc');
-    }
-  };
+  }, [apiVaults, searchTerm, riskFilter, institutionalOnly]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -76,6 +84,11 @@ export function VaultExplorer({ onNavigateToVault, watchlist, onToggleWatchlist,
     institutionalOnly
   ].filter(Boolean).length;
 
+  const totalTvl = filteredVaults.reduce((sum, v) => sum + v.tvl, 0);
+  const avgApy = filteredVaults.length > 0 
+    ? filteredVaults.reduce((sum, v) => sum + v.apy, 0) / filteredVaults.length 
+    : 0;
+
   return (
     <div className="min-h-screen bg-background">
       {renderNav()}
@@ -85,58 +98,77 @@ export function VaultExplorer({ onNavigateToVault, watchlist, onToggleWatchlist,
           <div>
             <h2 className="text-3xl font-bold mb-2">Vault Explorer</h2>
             <p className="text-muted-foreground">
-              Browse and analyze {VAULTS.length} institutional-grade DeFi yield opportunities
+              Browse and analyze {total} institutional-grade DeFi yield opportunities
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Total TVL</CardDescription>
-                <CardTitle className="text-2xl">
-                  {formatCurrency(VAULTS.reduce((sum, v) => sum + v.tvl, 0))}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Average APY</CardDescription>
-                <CardTitle className="text-2xl text-accent">
-                  {formatPercent(VAULTS.reduce((sum, v) => sum + v.apy, 0) / VAULTS.length)}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Vaults Tracked</CardDescription>
-                <CardTitle className="text-2xl">{VAULTS.length}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardDescription>Watchlist</CardDescription>
-                <CardTitle className="text-2xl">{watchlist.length}</CardTitle>
-              </CardHeader>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Funnel size={20} className="text-muted-foreground" />
-                  <CardTitle>Filters</CardTitle>
-                  {activeFiltersCount > 0 && (
-                    <Badge variant="secondary">{activeFiltersCount} active</Badge>
-                  )}
-                </div>
-                {activeFiltersCount > 0 && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    Clear All
-                  </Button>
-                )}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <CircleNotch className="animate-spin" size={24} />
+                <span>Loading vaults from API...</span>
               </div>
-            </CardHeader>
+            </div>
+          )}
+
+          {error && (
+            <Card className="border-destructive">
+              <CardContent className="pt-6">
+                <p className="text-destructive">Failed to load vaults: {error.message}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {!loading && !error && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardDescription>Total TVL</CardDescription>
+                    <CardTitle className="text-2xl">
+                      {formatCurrency(totalTvl)}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardDescription>Average APY</CardDescription>
+                    <CardTitle className="text-2xl text-accent">
+                      {formatPercent(avgApy)}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardDescription>Vaults Tracked</CardDescription>
+                    <CardTitle className="text-2xl">{total}</CardTitle>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardDescription>Watchlist</CardDescription>
+                    <CardTitle className="text-2xl">{watchlist.length}</CardTitle>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Funnel size={20} className="text-muted-foreground" />
+                      <CardTitle>Filters</CardTitle>
+                      {activeFiltersCount > 0 && (
+                        <Badge variant="secondary">{activeFiltersCount} active</Badge>
+                      )}
+                    </div>
+                    {activeFiltersCount > 0 && (
+                      <Button variant="ghost" size="sm" onClick={clearFilters}>
+                        Clear All
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="relative">
@@ -170,9 +202,9 @@ export function VaultExplorer({ onNavigateToVault, watchlist, onToggleWatchlist,
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Risk Levels</SelectItem>
-                    <SelectItem value="conservative">Conservative</SelectItem>
-                    <SelectItem value="moderate">Moderate</SelectItem>
-                    <SelectItem value="aggressive">Aggressive</SelectItem>
+                    <SelectItem value="low">Low Risk</SelectItem>
+                    <SelectItem value="medium">Medium Risk</SelectItem>
+                    <SelectItem value="high">High Risk</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -323,6 +355,8 @@ export function VaultExplorer({ onNavigateToVault, watchlist, onToggleWatchlist,
               </div>
             </CardContent>
           </Card>
+            </>
+          )}
         </div>
       </div>
     </div>

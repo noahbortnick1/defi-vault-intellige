@@ -16,10 +16,12 @@ import {
   MagnifyingGlass,
   SlidersHorizontal,
   FileText,
+  CircleNotch,
 } from '@phosphor-icons/react';
-import { VAULTS } from '@/lib/mockData';
-import { rankVaults, filterAndRankVaults } from '@/lib/ranking';
+import { useRankingsApi } from '@/hooks/use-rankings-api';
+import { useVaultsApi } from '@/hooks/use-vaults-api';
 import type { RankingMode, Chain } from '@/lib/types';
+import type { RankingMode as ApiRankingMode } from '@/api/types';
 import { formatCurrency, formatPercent, getRiskBgColor } from '@/lib/format';
 
 interface RankingsPageProps {
@@ -33,36 +35,47 @@ export function RankingsPage({ renderNav, onNavigateToVault, onGenerateReport }:
   const [filterAsset, setFilterAsset] = useState<string>('all');
   const [filterChain, setFilterChain] = useState<string>('all');
   const [filterProtocol, setFilterProtocol] = useState<string>('all');
-  const [filterRiskBand, setFilterRiskBand] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const rankedVaults = useMemo(() => {
-    const filters: any = {};
-    if (filterAsset !== 'all') filters.asset = filterAsset;
-    if (filterChain !== 'all') filters.chain = filterChain;
-    if (filterProtocol !== 'all') filters.protocol = filterProtocol;
-    if (filterRiskBand !== 'all') filters.riskBand = filterRiskBand;
+  const modeMapping: Record<RankingMode, ApiRankingMode> = {
+    'risk-adjusted': 'risk_adjusted',
+    'highest-yield': 'highest_yield',
+    'institutional-fit': 'institutional',
+    'best-liquidity': 'best_liquidity',
+  };
 
-    let ranked = Object.keys(filters).length > 0
-      ? filterAndRankVaults(VAULTS, rankingMode, filters)
-      : rankVaults(VAULTS, rankingMode);
+  const apiParams = useMemo(() => {
+    const params: any = {
+      mode: modeMapping[rankingMode],
+      limit: 50,
+    };
+    if (filterAsset !== 'all') params.asset = filterAsset;
+    if (filterChain !== 'all') params.chain = filterChain;
+    return params;
+  }, [rankingMode, filterAsset, filterChain]);
+
+  const { rankings, loading, error } = useRankingsApi(apiParams);
+  const { vaults: allVaults } = useVaultsApi({ limit: 100 });
+
+  const rankedVaults = useMemo(() => {
+    let filtered = rankings;
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      ranked = ranked.filter(v =>
-        v.name.toLowerCase().includes(query) ||
-        v.protocolName.toLowerCase().includes(query) ||
-        v.asset.toLowerCase().includes(query)
+      filtered = filtered.filter((r: any) =>
+        r.name.toLowerCase().includes(query) ||
+        r.protocol.toLowerCase().includes(query) ||
+        r.asset.toLowerCase().includes(query)
       );
     }
 
-    return ranked;
-  }, [rankingMode, filterAsset, filterChain, filterProtocol, filterRiskBand, searchQuery]);
+    return filtered;
+  }, [rankings, searchQuery]);
 
-  const uniqueAssets = Array.from(new Set(VAULTS.map(v => v.asset))).sort();
-  const uniqueChains = Array.from(new Set(VAULTS.map(v => v.chain))).sort();
-  const uniqueProtocols = Array.from(new Set(VAULTS.map(v => v.protocolName))).sort();
+  const uniqueAssets = Array.from(new Set(allVaults.map(v => v.asset))).sort();
+  const uniqueChains = Array.from(new Set(allVaults.map(v => v.chain))).sort();
+  const uniqueProtocols = Array.from(new Set(allVaults.map(v => v.protocolName))).sort();
 
   const getModeIcon = (mode: RankingMode) => {
     switch (mode) {
@@ -272,107 +285,111 @@ export function RankingsPage({ renderNav, onNavigateToVault, onGenerateReport }:
           )}
         </Card>
 
-        <div className="space-y-3">
-          {rankedVaults.slice(0, 20).map((vault) => (
-            <Card key={vault.id} className="hover:border-accent/50 transition-colors">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-                  <div className="lg:col-span-1 flex items-center justify-center">
-                    <div className={`flex items-center justify-center w-12 h-12 rounded-lg font-bold text-lg
-                      ${vault.ranking.rank === 1 ? 'bg-yellow-500/20 text-yellow-300' :
-                        vault.ranking.rank === 2 ? 'bg-gray-400/20 text-gray-300' :
-                        vault.ranking.rank === 3 ? 'bg-orange-500/20 text-orange-300' :
-                        'bg-muted text-muted-foreground'}`}
-                    >
-                      {vault.ranking.rank}
-                    </div>
-                  </div>
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <CircleNotch className="animate-spin" size={24} />
+              <span>Loading rankings from API...</span>
+            </div>
+          </div>
+        )}
 
-                  <div className="lg:col-span-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-1">{vault.name}</h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="outline" className="text-xs">
-                            {vault.protocolName}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {vault.chain}
-                          </Badge>
-                          <Badge className={`text-xs ${getRiskBgColor(vault.riskBand)}`}>
-                            {vault.riskBand} risk
-                          </Badge>
-                          {vault.institutionalGrade && (
-                            <Badge className="text-xs bg-accent/10 text-accent border-accent/20">
-                              Institutional
+        {error && (
+          <Card className="border-destructive">
+            <CardContent className="pt-6">
+              <p className="text-destructive">Failed to load rankings: {error.message}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!loading && !error && (
+          <div className="space-y-3">
+            {rankedVaults.slice(0, 20).map((entry: any) => (
+              <Card key={entry.vault_address} className="hover:border-accent/50 transition-colors">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                    <div className="lg:col-span-1 flex items-center justify-center">
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-lg font-bold text-lg
+                        ${entry.rank === 1 ? 'bg-yellow-500/20 text-yellow-300' :
+                          entry.rank === 2 ? 'bg-gray-400/20 text-gray-300' :
+                          entry.rank === 3 ? 'bg-orange-500/20 text-orange-300' :
+                          'bg-muted text-muted-foreground'}`}
+                      >
+                        {entry.rank}
+                      </div>
+                    </div>
+
+                    <div className="lg:col-span-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-1">{entry.name}</h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              {entry.protocol}
                             </Badge>
-                          )}
+                            <Badge variant="outline" className="text-xs">
+                              {entry.chain}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {entry.asset}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="lg:col-span-1 text-center">
-                    <div className="text-2xl font-bold text-accent">
-                      {vault.ranking.overallScore}
+                    <div className="lg:col-span-1 text-center">
+                      <div className="text-2xl font-bold text-accent">
+                        {entry.allocation_score}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Score</div>
                     </div>
-                    <div className="text-xs text-muted-foreground">Score</div>
-                  </div>
 
-                  <div className="lg:col-span-1 text-center">
-                    <div className="text-xl font-semibold text-foreground">
-                      {formatPercent(vault.apy)}
+                    <div className="lg:col-span-1 text-center">
+                      <div className="text-xl font-semibold text-foreground">
+                        {formatPercent(entry.apy)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">APY</div>
                     </div>
-                    <div className="text-xs text-muted-foreground">APY</div>
-                  </div>
 
-                  <div className="lg:col-span-1 text-center">
-                    <div className="text-sm font-semibold">
-                      {vault.riskScore.toFixed(1)}
+                    <div className="lg:col-span-1 text-center">
+                      <div className="text-sm font-semibold">
+                        {entry.risk_score.toFixed(1)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Risk</div>
                     </div>
-                    <div className="text-xs text-muted-foreground">Risk</div>
-                  </div>
 
-                  <div className="lg:col-span-1 text-center">
-                    <div className="text-sm font-semibold">
-                      {vault.liquidityScore.toFixed(1)}
+                    <div className="lg:col-span-1 text-center">
+                      <div className="text-sm font-semibold">{entry.liquidity_depth}</div>
+                      <div className="text-xs text-muted-foreground">Liquidity</div>
                     </div>
-                    <div className="text-xs text-muted-foreground">Liquidity</div>
-                  </div>
 
-                  <div className="lg:col-span-3">
-                    <div className="flex items-center gap-2 justify-end">
+                    <div className="lg:col-span-2 flex items-center justify-end gap-2">
                       <Button
-                        size="sm"
                         variant="outline"
-                        onClick={() => onNavigateToVault(vault.id)}
+                        size="sm"
+                        onClick={() => onNavigateToVault(entry.vault_address)}
                       >
-                        <ChartBar className="mr-2" size={16} />
-                        Details
+                        View Details
                       </Button>
                       <Button
+                        variant="default"
                         size="sm"
+                        onClick={() => onGenerateReport(entry.vault_address)}
                         className="bg-accent hover:bg-accent/90 text-accent-foreground"
-                        onClick={() => onGenerateReport(vault.id)}
                       >
-                        <FileText className="mr-2" size={16} />
+                        <FileText className="mr-2" size={14} />
                         DD Report
                       </Button>
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-                <div className="mt-3 pt-3 border-t border-border">
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium">Ranking rationale:</span> {vault.ranking.reasoning}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {rankedVaults.length === 0 && (
+        {!loading && !error && rankedVaults.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <MagnifyingGlass className="mx-auto mb-4 text-muted-foreground" size={48} />

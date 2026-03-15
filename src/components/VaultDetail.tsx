@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ShieldCheck, Star, FileText, TrendUp, Warning, CheckCircle, Info } from '@phosphor-icons/react';
-import { getVaultById } from '@/lib/mockData';
+import { ArrowLeft, ShieldCheck, Star, FileText, TrendUp, Warning, CheckCircle, Info, CircleNotch } from '@phosphor-icons/react';
+import { useVaultApi } from '@/hooks/use-vault-api';
 import { formatCurrency, formatPercent, formatDate, getRiskBgColor, getChainName, getStrategyLabel, formatAddress } from '@/lib/format';
 
 interface VaultDetailProps {
@@ -16,7 +16,41 @@ interface VaultDetailProps {
 }
 
 export function VaultDetail({ vaultId, onNavigateBack, renderNav, watchlist, onToggleWatchlist }: VaultDetailProps) {
-  const vault = getVaultById(vaultId);
+  const { vault, loading, error } = useVaultApi(vaultId);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        {renderNav()}
+        <div className="container mx-auto px-6 py-12">
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <CircleNotch className="animate-spin" size={24} />
+              <span>Loading vault details from API...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        {renderNav()}
+        <div className="container mx-auto px-6 py-12">
+          <Card className="border-destructive">
+            <CardContent className="pt-6">
+              <p className="text-destructive">Failed to load vault: {error.message}</p>
+              <Button onClick={onNavigateBack} className="mt-4">
+                Back to Vaults
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (!vault) {
     return (
