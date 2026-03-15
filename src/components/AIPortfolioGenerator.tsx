@@ -21,7 +21,7 @@ import {
 } from '@phosphor-icons/react';
 import { formatCurrency, formatPercent } from '@/lib/format';
 import { generateAIEnhancedPortfolioReport, type AIEnhancedPortfolioReport } from '@/lib/aiPortfolioReport';
-import { getPortfolioPositions, getPortfolioExposure, getPortfolioSummary } from '@/lib/portfolioApi';
+import { portfolioApi } from '@/lib/portfolioApi';
 import { exportToPDF, generatePDFFilename } from '@/lib/pdfExport';
 import { toast } from 'sonner';
 
@@ -124,9 +124,9 @@ export function AIPortfolioGenerator() {
 
       setGenerationProgress(40);
       const [positions, exposure, summary] = await Promise.all([
-        getPortfolioPositions(walletAddress),
-        getPortfolioExposure(walletAddress),
-        getPortfolioSummary(walletAddress),
+        portfolioApi.getPositions(walletAddress),
+        portfolioApi.getExposure(walletAddress),
+        portfolioApi.getSummary(walletAddress),
       ]);
 
       setGenerationProgress(60);
