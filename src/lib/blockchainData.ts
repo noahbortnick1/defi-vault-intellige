@@ -234,8 +234,11 @@ export function convertDeFiLlamaPoolToVault(pool: DeFiLlamaPool, index: number):
   const apyReward = pool.apyReward || 0;
   const totalApy = pool.apy || (apyBase + apyReward);
   
+  const name = pool.symbol || `${pool.project} ${asset} Vault`;
+  
   return {
     id: pool.pool || `pool-${index}`,
+    name,
     address: pool.pool.split(':')[1] || pool.pool,
     protocol: pool.project,
     chain,
@@ -255,6 +258,7 @@ export function convertDeFiLlamaPoolToVault(pool: DeFiLlamaPool, index: number):
     apy_reward: apyReward,
     audits: [],
     dependencies,
+    strategy_type: strategyType as any,
   };
 }
 
@@ -281,7 +285,7 @@ export async function fetchRealVaultData(): Promise<Vault[]> {
   }
 }
 
-export async function fetchVaultsByChain(chain: Chain): Promise<Vault[]> {
+export async function fetchVaultsByChain(chain: string): Promise<Vault[]> {
   const allVaults = await fetchRealVaultData();
   return allVaults.filter(v => v.chain === chain);
 }
@@ -305,9 +309,9 @@ export async function searchVaults(query: string): Promise<Vault[]> {
   const lowerQuery = query.toLowerCase();
   
   return allVaults.filter(v =>
-    v.name.toLowerCase().includes(lowerQuery) ||
-    v.protocol.toLowerCase().includes(lowerQuery) ||
-    v.asset.toLowerCase().includes(lowerQuery)
+    (v.name?.toLowerCase() || '').includes(lowerQuery) ||
+    (v.protocol?.toLowerCase() || '').includes(lowerQuery) ||
+    (v.asset?.toLowerCase() || '').includes(lowerQuery)
   );
 }
 
@@ -355,7 +359,7 @@ export interface VaultStats {
   totalVaults: number;
   totalTVL: number;
   avgAPY: number;
-  chains: Record<Chain, number>;
+  chains: Record<string, number>;
   protocols: Record<string, number>;
   assets: Record<string, number>;
 }
@@ -365,7 +369,7 @@ export function calculateVaultStats(vaults: Vault[]): VaultStats {
     totalVaults: vaults.length,
     totalTVL: 0,
     avgAPY: 0,
-    chains: {} as Record<Chain, number>,
+    chains: {},
     protocols: {},
     assets: {},
   };

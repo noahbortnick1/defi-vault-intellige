@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Vault, Chain } from '@/lib/types';
+import type { Vault } from '@/api/types';
 import {
   fetchRealVaultDataWithCache,
   fetchVaultsByChain,
@@ -11,7 +11,7 @@ import {
 } from '@/lib/blockchainData';
 
 interface UseRealVaultsOptions {
-  chain?: Chain;
+  chain?: string;
   protocol?: string;
   asset?: string;
   autoFetch?: boolean;
@@ -40,7 +40,7 @@ export function useRealVaults(options: UseRealVaultsOptions = {}): UseRealVaults
       let data: Vault[];
 
       if (options.chain) {
-        data = await fetchVaultsByChain(options.chain);
+        data = await fetchVaultsByChain(options.chain as any);
       } else if (options.protocol) {
         data = await fetchVaultsByProtocol(options.protocol);
       } else if (options.asset) {

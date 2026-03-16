@@ -55,9 +55,9 @@ export function VaultExplorer({ onNavigateToVault, watchlist, onToggleWatchlist,
 
   const filteredVaults = useMemo(() => {
     let vaults = apiVaults.filter((vault) => {
-      const matchesSearch = vault.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vault.protocolName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vault.asset.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = (vault.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (vault.protocolName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (vault.asset?.toLowerCase() || '').includes(searchTerm.toLowerCase());
       
       const matchesRisk = riskFilter === 'all' || vault.riskBand === riskFilter;
       const matchesInstitutional = !institutionalOnly || vault.institutionalGrade;

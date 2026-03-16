@@ -35,7 +35,7 @@ export function RealDataDashboard({ onSelectVault }: RealDataDashboardProps) {
 
   const filteredVaults = vaults.filter(vault => {
     if (selectedChain && vault.chain !== selectedChain) return false;
-    if (selectedProtocol && !vault.protocol.toLowerCase().includes(selectedProtocol.toLowerCase())) return false;
+    if (selectedProtocol && !(vault.protocol?.toLowerCase() || '').includes(selectedProtocol.toLowerCase())) return false;
     return true;
   });
 

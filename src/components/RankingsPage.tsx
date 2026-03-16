@@ -64,9 +64,9 @@ export function RankingsPage({ renderNav, onNavigateToVault, onGenerateReport }:
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((r: any) =>
-        r.name.toLowerCase().includes(query) ||
-        r.protocol.toLowerCase().includes(query) ||
-        r.asset.toLowerCase().includes(query)
+        (r.name?.toLowerCase() || '').includes(query) ||
+        (r.protocol?.toLowerCase() || '').includes(query) ||
+        (r.asset?.toLowerCase() || '').includes(query)
       );
     }
 
