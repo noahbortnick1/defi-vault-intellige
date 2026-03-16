@@ -157,10 +157,12 @@ export interface VaultsQueryParams {
   strategy_type?: StrategyType;
   min_apy?: number;
   max_risk?: number;
+  min_tvl?: number;
   sort?: string;
   order?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
+  page?: number;
 }
 
 export interface RankingsQueryParams {

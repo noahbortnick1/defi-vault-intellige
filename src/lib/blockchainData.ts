@@ -1,4 +1,5 @@
-import type { Vault, Chain, Protocol } from './types';
+import type { Vault } from '@/api/types';
+import type { Chain, Protocol } from './types';
 
 const DEFILLAMA_API = 'https://yields.llama.fi';
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
@@ -236,27 +237,23 @@ export function convertDeFiLlamaPoolToVault(pool: DeFiLlamaPool, index: number):
   return {
     id: pool.pool || `pool-${index}`,
     name: pool.poolMeta || `${pool.project} ${pool.symbol}`,
+    address: pool.pool.split(':')[1] || pool.pool,
     protocol: pool.project,
     chain,
     asset,
     tvl: pool.tvlUsd,
     apy: totalApy,
-    apy_base: apyBase,
-    apy_reward: apyReward,
     strategy_type: strategyType,
     risk_score: riskScore,
-    liquidity_depth: liquidityDepth,
-    upgradeability,
-    dependencies,
-    yield_sources: yieldSources,
-    contract_address: pool.pool.split(':')[1] || pool.pool,
     allocation_score: 0,
-    underlying_tokens: pool.underlyingTokens || [asset],
-    exposure: pool.exposure || 'single',
-    il_risk: pool.ilRisk === 'yes',
-    stablecoin: pool.stablecoin,
-    url: pool.url,
-    last_updated: Date.now(),
+    strategy: `${pool.project} ${strategyType} strategy`,
+    dependencies,
+    oracle_type: 'chainlink',
+    upgradeability,
+    liquidity_depth: liquidityDepth,
+    yield_sources: yieldSources,
+    source: 'defillama',
+    updated_at: new Date().toISOString(),
   };
 }
 

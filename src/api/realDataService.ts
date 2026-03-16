@@ -145,11 +145,10 @@ export class RealDataApiService {
     const end = start + limit;
 
     return {
-      data: filtered.slice(start, end),
+      items: filtered.slice(start, end),
       total: filtered.length,
-      page,
       limit,
-      pages: Math.ceil(filtered.length / limit),
+      offset: start,
     };
   }
 
@@ -157,7 +156,7 @@ export class RealDataApiService {
     await this.ensureVaultsLoaded();
     
     const vault = this.vaults.find(
-      (v) => v.contract_address?.toLowerCase() === address.toLowerCase() ||
+      (v) => v.address?.toLowerCase() === address.toLowerCase() ||
              v.id.toLowerCase() === address.toLowerCase()
     );
     return vault || null;
