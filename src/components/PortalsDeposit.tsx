@@ -6,35 +6,45 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { portalsApi, type PortalsToken, type PortalsBalance, type PortalsQuote } from '@/lib
+import { portalsApi, type PortalsToken, type PortalsBalance, type PortalsQuote } from '@/lib/portalsApi';
 import { formatCurrency } from '@/lib/format';
+import { Lightning, Wallet, CheckCircle, ArrowRight, Info, Warning } from '@phosphor-icons/react';
+import { toast } from 'sonner';
+
 interface PortalsDepositProps {
   vaultSymbol: string;
+  vaultAddress: string;
+  vaultChainId: number;
+  onSuccess?: () => void;
+}
 
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
 
-  const [walletAddress,
-  const [selectedToken
-  const [quote, setQuot
-  const [quoting, setQuot
+export function PortalsDeposit({ vaultSymbol, vaultAddress, vaultChainId, onSuccess }: PortalsDepositProps) {
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [walletAddress, setWalletAddress] = useState('');
+  const [balances, setBalances] = useState<PortalsBalance[]>([]);
+  const [selectedToken, setSelectedToken] = useState('');
+  const [inputAmount, setInputAmount] = useState('');
+  const [quote, setQuote] = useState<PortalsQuote | null>(null);
+  const [quoting, setQuoting] = useState(false);
 
-
-      loadBalances(window.ethereum.selectedAddress);
-    }
-
-    if (!window.ethereum) {
-      return;
-
-      setLoading(true);
-      const address = accounts[0];
-      setConnected(true);
-
-      console.error
-    } finally {
-      setWalletAddress(window.ethereum.selectedAddress);
-      loadBalances(window.ethereum.selectedAddress);
-      setConnected(true);
-    }
+  useEffect(() => {
+    checkWalletConnection();
   }, []);
+
+  const checkWalletConnection = async () => {
+    if (window.ethereum && window.ethereum.selectedAddress) {
+      setWalletAddress(window.ethereum.selectedAddress);
+      setConnected(true);
+      loadBalances(window.ethereum.selectedAddress);
+    }
+  };
 
   const connectWallet = async () => {
     if (!window.ethereum) {
@@ -254,82 +264,94 @@ interface PortalsDepositProps {
                         {inputAmount && (
                           <span className="text-accent font-medium">
                             ≈ {formatCurrency(inputValueUsd)}
-                          <span c
-                          
-                        </di
-                          
-                        
-                  
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-                       
+                {selectedToken && inputAmount && !quote && (
+                  <Button 
+                    onClick={getQuote}
+                    disabled={quoting || !inputAmount || parseFloat(inputAmount) <= 0}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    {quoting ? 'Getting Quote...' : 'Get Quote'}
+                  </Button>
+                )}
+
+                {quote && (
+                  <div className="space-y-4">
+                    <Separator />
+                    
+                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Info className="text-accent" size={18} />
+                        <h4 className="font-semibold">Quote Summary</h4>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">You send</span>
+                          <span className="font-medium">
+                            {inputAmount} {selectedBalance?.symbol}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span clas
+                          <span className="text-muted-foreground">You receive (estimated)</span>
+                          <span className="font-medium">
+                            {(parseFloat(quote.context.outputAmount) / Math.pow(10, 18)).toFixed(6)} {vaultSymbol}
                           </span>
-                 
-                      <div className="flex items-start gap-2 p
-                        <
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Input value</span>
+                          <span className="font-medium">{formatCurrency(quote.estimate.inputAmountUsd)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Output value</span>
+                          <span className="font-medium">{formatCurrency(quote.estimate.outputAmountUsd)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Estimated gas</span>
+                          <span className="font-medium">{formatCurrency(quote.estimate.gasCostUsd)}</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between font-semibold">
+                          <span>Net balance change</span>
+                          <span className="text-accent">
+                            {formatCurrency(quote.estimate.netBalanceChangeUsd)}
+                          </span>
+                        </div>
+                      </div>
 
+                      <div className="flex items-start gap-2 p-3 bg-background/50 rounded border border-accent/20 mt-3">
+                        <Warning className="text-accent mt-0.5 flex-shrink-0" size={16} />
+                        <p className="text-xs text-muted-foreground">
+                          Slippage tolerance: {quote.context.slippageTolerancePercentage}%. 
+                          Minimum output: {(parseFloat(quote.context.minOutputAmount) / Math.pow(10, 18)).toFixed(6)} {vaultSymbol}
+                        </p>
+                      </div>
                     </div>
-                    
-                      disabled={l
-                    
+
+                    <Button 
+                      onClick={executeDeposit}
+                      disabled={loading}
+                      className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                      size="lg"
+                    >
                       <Lightning className="mr-2" size={20} weight="fill" />
+                      {loading ? 'Executing...' : 'Execute Deposit'}
                       <ArrowRight className="ml-2" size={20} />
-                  </>
+                    </Button>
+                  </div>
+                )}
               </>
+            )}
           </>
+        )}
       </CardContent>
+    </Card>
   );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
