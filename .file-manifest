@@ -94,6 +94,8 @@ src/components/ApiReportViewer.tsx
 src/components/ArchitectureVisualization.tsx
 src/components/DiscoveryEnginePanel.tsx
 src/components/MetricCard.tsx
+src/components/PortalsDeposit.tsx
+src/components/PortalsIntegration.tsx
 src/components/PortfolioApiView.tsx
 src/components/PortfolioFinancialsView.tsx
 src/components/PortfolioReportView.tsx
@@ -134,6 +136,7 @@ src/lib/formatters.ts
 src/lib/mockData.ts
 src/lib/pdfExport.ts
 src/lib/pdfExportSimple.ts
+src/lib/portalsApi.ts
 src/lib/portfolioApi.ts
 src/lib/ranking.ts
 src/lib/reportApi.ts
@@ -142,3 +145,4 @@ src/lib/risk.ts
 src/lib/strategyMap.ts
 src/lib/types.ts
 src/lib/web3Rpc.ts
+src/vite-end.d.ts

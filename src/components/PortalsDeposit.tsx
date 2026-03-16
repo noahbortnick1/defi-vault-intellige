@@ -6,30 +6,30 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Wallet, ArrowRight, Lightning, CheckCircle, Warning } from '@phosphor-icons/react';
-import { portalsApi, type PortalsToken, type PortalsBalance, type PortalsQuote } from '@/lib/portalsApi';
-import { toast } from 'sonner';
+import { portalsApi, type PortalsToken, type PortalsBalance, type PortalsQuote } from '@/lib
 import { formatCurrency } from '@/lib/format';
-
 interface PortalsDepositProps {
-  vaultAddress: string;
   vaultSymbol: string;
-  vaultChainId: number;
-  onSuccess?: () => void;
-}
 
-export function PortalsDeposit({ vaultAddress, vaultSymbol, vaultChainId, onSuccess }: PortalsDepositProps) {
-  const [walletAddress, setWalletAddress] = useState('');
-  const [balances, setBalances] = useState<PortalsBalance[]>([]);
-  const [selectedToken, setSelectedToken] = useState<string>('');
-  const [inputAmount, setInputAmount] = useState('');
-  const [quote, setQuote] = useState<PortalsQuote | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [quoting, setQuoting] = useState(false);
-  const [connected, setConnected] = useState(false);
 
-  useEffect(() => {
-    if (window.ethereum && window.ethereum.selectedAddress) {
+  const [walletAddress,
+  const [selectedToken
+  const [quote, setQuot
+  const [quoting, setQuot
+
+
+      loadBalances(window.ethereum.selectedAddress);
+    }
+
+    if (!window.ethereum) {
+      return;
+
+      setLoading(true);
+      const address = accounts[0];
+      setConnected(true);
+
+      console.error
+    } finally {
       setWalletAddress(window.ethereum.selectedAddress);
       loadBalances(window.ethereum.selectedAddress);
       setConnected(true);
@@ -254,82 +254,82 @@ export function PortalsDeposit({ vaultAddress, vaultSymbol, vaultChainId, onSucc
                         {inputAmount && (
                           <span className="text-accent font-medium">
                             ≈ {formatCurrency(inputValueUsd)}
+                          <span c
+                          
+                        </di
+                          
+                        
+                  
+
+                       
+                        </div>
+                        <div className="flex justify-between">
+                          <span clas
                           </span>
-                        )}
-                      </div>
+                 
+                      <div className="flex items-start gap-2 p
+                        <
+
                     </div>
-                  </div>
-                )}
-
-                <Button
-                  onClick={getQuote}
-                  disabled={!selectedToken || !inputAmount || quoting}
-                  className="w-full"
-                  variant="outline"
-                >
-                  {quoting ? 'Getting Quote...' : 'Get Quote'}
-                </Button>
-
-                {quote && (
-                  <>
-                    <Separator />
                     
-                    <div className="space-y-3 p-4 bg-accent/5 rounded-lg border border-accent/20">
-                      <h4 className="font-semibold text-sm">Transaction Preview</h4>
-                      
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">You pay</span>
-                          <span className="font-medium">
-                            {formatCurrency(quote.estimate.inputAmountUsd)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">You receive</span>
-                          <span className="font-medium">
-                            {formatCurrency(quote.estimate.outputAmountUsd)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Gas cost</span>
-                          <span className="font-medium">
-                            {formatCurrency(quote.estimate.gasCostUsd)}
-                          </span>
-                        </div>
-                        <Separator />
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Net balance</span>
-                          <span className="font-semibold text-accent">
-                            {formatCurrency(quote.estimate.netBalanceChangeUsd)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-2 p-3 bg-background/50 rounded border border-border">
-                        <Warning className="text-yellow-500 mt-0.5" size={16} />
-                        <p className="text-xs text-muted-foreground">
-                          Slippage tolerance: 0.5%. Minimum output: {(parseFloat(quote.context.minOutputAmount) / Math.pow(10, 18)).toFixed(6)} {vaultSymbol}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={executeDeposit}
-                      disabled={loading}
-                      className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-                      size="lg"
-                    >
+                      disabled={l
+                    
                       <Lightning className="mr-2" size={20} weight="fill" />
-                      {loading ? 'Processing...' : 'Execute Deposit'}
                       <ArrowRight className="ml-2" size={20} />
-                    </Button>
                   </>
-                )}
               </>
-            )}
           </>
-        )}
       </CardContent>
-    </Card>
   );
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
