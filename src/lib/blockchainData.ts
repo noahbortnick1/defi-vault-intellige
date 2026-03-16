@@ -237,22 +237,28 @@ export function convertDeFiLlamaPoolToVault(pool: DeFiLlamaPool, index: number):
   return {
     id: pool.pool || `pool-${index}`,
     address: pool.pool.split(':')[1] || pool.pool,
-    address: pool.pool.split(':')[1] || pool.pool,
     protocol: pool.project,
     chain,
     asset,
     tvl: pool.tvlUsd,
     risk_score: riskScore,
     allocation_score: 0,
-    allocation_score: 0,
     strategy: `${pool.project} ${strategyType} strategy`,
-    oracle_type: 'chainlink',
     oracle_type: 'chainlink',
     upgradeability,
     liquidity_depth: liquidityDepth,
     yield_sources: yieldSources,
     source: 'defillama',
     updated_at: new Date().toISOString(),
+    apy: totalApy,
+    apy_base: apyBase,
+    apy_reward: apyReward,
+    audits: [],
+    dependencies,
+  };
+}
+
+export async function fetchRealVaultData(): Promise<Vault[]> {
   try {
     const pools = await fetchDeFiLlamaPools();
     

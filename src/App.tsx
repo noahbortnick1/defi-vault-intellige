@@ -44,8 +44,9 @@ import { ApiDemo } from '@/components/ApiDemo';
 import { PortfolioWithWallet } from '@/components/PortfolioWithWallet';
 import { RealDataDashboard } from '@/components/RealDataDashboard';
 import { StrategyMap } from '@/components/StrategyMap';
+import { PortalsIntegration } from '@/components/PortalsIntegration';
 
-type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'strategy-map' | 'settings';
+type Page = 'landing' | 'vaults' | 'vault-detail' | 'radar' | 'portfolio' | 'portfolio-api' | 'portfolio-wallet' | 'discovery' | 'wallet-tracker' | 'rankings' | 'vault-report' | 'portfolio-report' | 'ai-portfolio' | 'pricing' | 'docs' | 'api-demo' | 'real-data' | 'strategy-map' | 'portals' | 'settings';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -154,6 +155,15 @@ function App() {
               Strategy Map
             </Button>
             <Button 
+              variant={currentPage === 'portals' ? 'secondary' : 'ghost'}
+              onClick={() => setCurrentPage('portals')}
+              size="sm"
+              className="bg-accent/10 hover:bg-accent/20 border border-accent/30"
+            >
+              <Lightning className="mr-2" size={18} weight="fill" />
+              Portals
+            </Button>
+            <Button 
               variant={currentPage === 'radar' ? 'secondary' : 'ghost'}
               onClick={() => setCurrentPage('radar')}
               size="sm"
@@ -220,21 +230,21 @@ function App() {
             </p>
 
             <div className="flex items-center justify-center gap-4 pt-4">
+              <Button size="lg" onClick={() => setCurrentPage('portals')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Lightning className="mr-2" size={20} weight="fill" />
+                Deposit via Portals
+              </Button>
               <Button size="lg" onClick={() => setCurrentPage('real-data')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
                 <Database className="mr-2" size={20} weight="fill" />
                 Live Blockchain Data
               </Button>
-              <Button size="lg" onClick={() => setCurrentPage('ai-portfolio')} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button size="lg" onClick={() => setCurrentPage('ai-portfolio')} variant="outline">
                 <Lightning className="mr-2" size={20} weight="fill" />
                 AI Reports
               </Button>
-              <Button size="lg" onClick={() => setCurrentPage('rankings')} className="bg-primary hover:bg-primary/90">
+              <Button size="lg" onClick={() => setCurrentPage('rankings')} variant="outline">
                 <ChartBar className="mr-2" size={20} />
                 View Rankings
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => setCurrentPage('vaults')}>
-                <Vault className="mr-2" size={20} />
-                Explore Vaults
               </Button>
             </div>
           </div>
@@ -242,6 +252,56 @@ function App() {
       </div>
 
       <div className="container mx-auto px-6 py-16">
+        <Card className="border-2 border-accent/50 bg-gradient-to-br from-accent/10 via-accent/5 to-background mb-16">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-3 bg-accent/20 rounded-xl">
+                    <Lightning className="text-accent" size={32} weight="fill" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl mb-1">Portals.fi Integration</CardTitle>
+                    <Badge className="bg-accent text-accent-foreground">ONE-CLICK DEPOSITS</Badge>
+                  </div>
+                </div>
+                <CardDescription className="text-base">
+                  Swap any token and deposit into DeFi vaults in a single transaction
+                </CardDescription>
+              </div>
+              <Button 
+                onClick={() => setCurrentPage('portals')} 
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground"
+              >
+                <Lightning className="mr-2" size={20} weight="fill" />
+                Try Portals
+                <ArrowRight className="ml-2" size={20} />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Any Token</p>
+                <p className="text-sm text-muted-foreground">Deposit with ETH, USDC, WBTC, or any ERC-20</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">One Transaction</p>
+                <p className="text-sm text-muted-foreground">Swap + deposit executed atomically</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">Best Rates</p>
+                <p className="text-sm text-muted-foreground">Optimal routing across DEX aggregators</p>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
+                <p className="text-xs text-accent font-semibold mb-1">500+ Protocols</p>
+                <p className="text-sm text-muted-foreground">Access all major DeFi platforms</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="border-2 border-accent/50 bg-gradient-to-br from-accent/10 via-accent/5 to-background mb-16">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -955,6 +1015,15 @@ function App() {
             {renderNav()}
             <div className="container mx-auto px-6 py-12">
               <StrategyMap onVaultClick={navigateToVault} />
+            </div>
+          </div>
+        );
+      case 'portals':
+        return (
+          <div className="min-h-screen bg-background">
+            {renderNav()}
+            <div className="container mx-auto px-6 py-12">
+              <PortalsIntegration />
             </div>
           </div>
         );

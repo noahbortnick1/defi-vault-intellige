@@ -1,6 +1,6 @@
 # DeFi Vault Intelligence Platform - Real Blockchain Data Edition
 
-An institutional-grade due diligence and treasury analytics platform for DeFi yield vaults with **REAL BLOCKCHAIN DATA**, built for funds, treasuries, and developers who need intelligent rankings, comprehensive DD reports, and data-driven allocation insights.
+An institutional-grade due diligence and treasury analytics platform for DeFi yield vaults with **REAL BLOCKCHAIN DATA** and **ONE-CLICK DEPOSITS via Portals.fi**, built for funds, treasuries, and developers who need intelligent rankings, comprehensive DD reports, and frictionless capital deployment.
 
 ## 🔥 Real Data Integration
 
@@ -12,6 +12,17 @@ This platform now features **production-ready blockchain data integration**:
 - **Live TVL & APY**: Actual on-chain data, not mocks
 - **500+ Protocols**: Aave, Morpho, Yearn, Curve, Pendle, Compound, and more
 
+## 🚀 Portals.fi Integration (NEW)
+
+**One-click deposits from any token into any DeFi vault**:
+
+- **Any Token Input**: Deposit using ETH, USDC, WBTC, or any ERC-20 token
+- **Atomic Execution**: Swap + deposit in a single on-chain transaction
+- **Best Routing**: Optimal swap routes across DEX aggregators
+- **500+ Platforms**: Support for all major DeFi protocols and vaults
+- **MetaMask Integration**: Seamless wallet connection and transaction signing
+- **Real-time Quotes**: Gas estimates and slippage protection (0.5% tolerance)
+
 **Experience Qualities**:
 1. **Professional** - Bloomberg-level data density and clarity with institutional typography and color choices that convey authority and precision
 2. **Decisive** - Rankings and reports that support fast, confident allocation decisions with transparent methodology and clear recommendations
@@ -22,15 +33,23 @@ This is a multi-page institutional analytics platform with intelligent ranking a
 
 ## Core Product Modules
 
-The platform is organized around five first-class modules that form a complete workflow from discovery to allocation:
+The platform is organized around six first-class modules that form a complete workflow from discovery to allocation:
 
 1. **Vault Rankings** - Decision layer for rapid vault selection using multi-dimensional scoring
 2. **DD Reports** - Comprehensive due diligence reports with strategy, risk, and dependency analysis
 3. **Vault Explorer** - Discovery and filtering of yield opportunities across protocols and chains
 4. **Portfolio / Treasury** - Position tracking with exposure analysis and concentration risk assessment
-5. **Developer API** - RESTful API for rankings, vault data, and report generation
+5. **Portals Integration** - One-click deposits from any token into any vault via Portals.fi
+6. **Developer API** - RESTful API for rankings, vault data, and report generation
 
 ## Essential Features
+
+### Portals Integration (Execution Layer)
+- **Functionality**: One-click token swaps and vault deposits through Portals.fi API integration with MetaMask wallet connectivity
+- **Purpose**: Remove friction from capital deployment - swap any token (ETH, USDC, WBTC, etc.) and deposit into target vault in a single atomic transaction
+- **Trigger**: User clicks "Portals" from main nav or "Deposit" buttons on vault detail pages
+- **Progression**: Connect MetaMask wallet → View token balances → Select input token and amount → Get quote with gas estimates → Review swap+deposit preview → Execute transaction → Receive confirmation
+- **Success criteria**: Quote generation <2 seconds, clear gas cost and slippage display, transaction success rate >95%, support for 500+ DeFi platforms
 
 ### Vault Rankings (Decision Layer)
 - **Functionality**: Multi-dimensional vault ranking system with composite scoring based on APY, risk, liquidity, audit quality, dependency complexity, and incentive dependence
